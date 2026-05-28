@@ -25,6 +25,52 @@ export default function MedTracker({
   const [interactionWarning, setInteractionWarning] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const [customTime, setCustomTime] = useState('');
+  const [enableSms, setEnableSms] = useState(false);
+  const [customMessage, setCustomMessage] = useState('');
+
+  const formatTimeTo12h = (time24) => {
+    if (!time24) return "";
+    const [hoursStr, minutesStr] = time24.split(":");
+    let hours = parseInt(hoursStr, 10);
+    const minutes = minutesStr;
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  };
+
+  const triggerTelegramAlert = async (medName, dosage, timeVal, messageVal) => {
+    try {
+      const msgText = `🔔 MediAI Reminder Alert:\nTime to take your ${medName} (${dosage})!\nAlarm Time: ${timeVal || "Scheduled Timing"}\nMessage: "${messageVal || 'Please take your prescription.'}"`;
+      
+      const response = await fetch("http://127.0.0.1:8000/api/medications/remind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msgText })
+      });
+      
+      if (response.ok) {
+        setSmsLogs(prev => [
+          {
+            id: `sms_${Date.now()}`,
+            time: new Date().toLocaleTimeString(),
+            phone: "Telegram Bot Alert",
+            message: msgText,
+            status: "Delivered"
+          },
+          ...prev
+        ]);
+        alert(`Telegram Bot Alert successfully dispatched for ${medName}!`);
+      } else {
+        alert("Failed to send Telegram alert. Check if your backend server is running and .env is set.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error sending Telegram alert.");
+    }
+  };
+
   // Common Drug Interaction Rules for premium hackathon demo
   const DRUG_INTERACTIONS = [
     {
@@ -117,8 +163,20 @@ export default function MedTracker({
     if (!medName.trim() || !dosage.trim() || !session?.user?.id) return;
 
     setLoading(true);
+    
+    // Package selected timings
     const selectedTiming = Object.keys(timing).filter(k => timing[k]);
     const phoneClean = phone.trim() || "+1 (555) 019-9482";
+    
+    let formattedTime = "";
+    if (customTime) {
+      formattedTime = formatTimeTo12h(customTime);
+      selectedTiming.push(`time:${formattedTime}`);
+    }
+    
+    if (enableSms && customMessage.trim()) {
+      selectedTiming.push(`msg:${customMessage.trim()}`);
+    }
 
     try {
       const { data, error } = await supabase
@@ -140,21 +198,54 @@ export default function MedTracker({
       if (data) {
         setMedications(prev => [...prev, data]);
         
-        // Add log entry showing Twilio active trigger simulation
+        const displayTiming = selectedTiming.filter(t => !t.startsWith("time:") && !t.startsWith("msg:"));
+        const timeLog = formattedTime ? ` [at ${formattedTime}]` : "";
+        const alertLog = enableSms ? ` (Telegram Alerts Enabled)` : "";
+        
+        // Add log entry showing Twilio/Telegram active trigger simulation
         setSmsLogs(prev => [
           {
             id: `sms_${Date.now()}`,
             time: new Date().toLocaleTimeString(),
-            phone: phoneClean,
-            message: `MediAI Alert: Scheduled reminders active for ${medName} (${dosage}) at [${selectedTiming.join(', ')}].`,
+            phone: enableSms ? "Telegram Bot Alerts" : phoneClean,
+            message: `MediAI Alert: Scheduled reminders active for ${medName} (${dosage}) at [${displayTiming.join(', ')}]${timeLog}${alertLog}.`,
             status: "Scheduled"
           },
           ...prev
         ]);
 
+        // Send actual live Telegram Alert confirmation right away!
+        if (enableSms && customMessage.trim()) {
+          try {
+            const telegramMsg = `🔔 MediAI Bot Active:\nReminder scheduled for ${medName} (${dosage})!\nAlarm Time: ${formattedTime || displayTiming.join(', ') || 'N/A'}\nInstructions: "${customMessage.trim()}"`;
+            await fetch("http://127.0.0.1:8000/api/medications/remind", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: telegramMsg })
+            });
+            
+            // Log it in SMS alerts log as delivered!
+            setSmsLogs(prev => [
+              {
+                id: `sms_tele_${Date.now()}`,
+                time: new Date().toLocaleTimeString(),
+                phone: "Telegram Bot",
+                message: telegramMsg,
+                status: "Delivered"
+              },
+              ...prev
+            ]);
+          } catch (e) {
+            console.error("Live Telegram trigger failed:", e);
+          }
+        }
+
         // Reset
         setMedName('');
         setDosage('');
+        setCustomTime('');
+        setEnableSms(false);
+        setCustomMessage('');
         setInteractionWarning(null);
       }
     } catch (err) {
@@ -206,41 +297,81 @@ export default function MedTracker({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {medications.map((med) => (
-                <div 
-                  key={med.id} 
-                  className="p-4 bg-dark-950/60 border border-dark-800 hover:border-neon-mint/30 rounded-2xl flex flex-col justify-between transition-all"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className={`font-bold text-slate-200 block ${elderlyMode ? 'text-lg' : 'text-sm'}`}>
-                        {med.name}
-                      </span>
-                      <span className="text-[10px] text-slate-500 mt-0.5 block">
-                        Dosage: {med.dosage}
-                      </span>
-                    </div>
-                    <button 
-                      onClick={() => handleDeleteMedication(med.id)}
-                      className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-dark-900 transition-all"
-                      title="Remove Medication"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="flex gap-1.5 mt-4">
-                    {med.timing.map((time, idx) => (
-                      <span 
-                        key={idx} 
-                        className="bg-dark-900 text-neon-mint text-[9px] font-bold px-2 py-0.5 border border-neon-mint/20 rounded-full flex items-center gap-1"
+              {medications.map((med) => {
+                const frequencies = [];
+                let timeVal = "";
+                let messageVal = "";
+                
+                if (Array.isArray(med.timing)) {
+                  med.timing.forEach(t => {
+                    if (t.startsWith("time:")) timeVal = t.substring(5);
+                    else if (t.startsWith("msg:")) messageVal = t.substring(4);
+                    else frequencies.push(t);
+                  });
+                }
+                
+                return (
+                  <div 
+                    key={med.id} 
+                    className="p-5 bg-dark-950/60 border border-dark-800 hover:border-neon-mint/30 rounded-2xl flex flex-col justify-between transition-all relative overflow-hidden"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className={`font-bold text-slate-200 block ${elderlyMode ? 'text-lg' : 'text-sm'}`}>
+                          {med.name}
+                        </span>
+                        <span className="text-[10px] text-slate-500 mt-0.5 block">
+                          Dosage: {med.dosage}
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteMedication(med.id)}
+                        className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-dark-900 transition-all shrink-0"
+                        title="Remove Medication"
                       >
-                        <Clock className="w-2.5 h-2.5" /> {time}
-                      </span>
-                    ))}
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 mt-4">
+                      {frequencies.map((time, idx) => (
+                        <span 
+                          key={idx} 
+                          className="bg-dark-900 text-slate-400 text-[9px] font-bold px-2.5 py-0.5 border border-dark-800 rounded-full"
+                        >
+                          {time}
+                        </span>
+                      ))}
+                      
+                      {timeVal && (
+                        <span 
+                          className="bg-neon-mint/10 text-neon-mint text-[9px] font-bold px-2.5 py-0.5 border border-neon-mint/20 rounded-full flex items-center gap-1 glow-text-mint animate-pulse"
+                        >
+                          <Clock className="w-2.5 h-2.5" /> {timeVal}
+                        </span>
+                      )}
+                    </div>
+
+                    {messageVal && (
+                      <div className="mt-3 pt-3 border-t border-dark-800/40 text-[10px] space-y-2">
+                        <div className="text-slate-400 bg-white/[0.01] border border-white/[0.04] p-2 rounded-xl flex items-start gap-2 leading-relaxed">
+                          <MessageSquare className="w-3.5 h-3.5 text-neon-mint mt-0.5 shrink-0" />
+                          <div>
+                            <span className="text-[8px] font-bold uppercase text-neon-mint block mb-0.5">Telegram Alert Active</span>
+                            "{messageVal}"
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => triggerTelegramAlert(med.name, med.dosage, timeVal, messageVal)}
+                          className="w-full py-1.5 rounded-lg bg-dark-900 hover:bg-neon-mint hover:text-dark-950 text-[9px] font-bold text-neon-mint transition-all border border-neon-mint/20 flex items-center justify-center gap-1"
+                        >
+                          <Bell className="w-3 h-3 animate-swing" /> Test Telegram Alert Now
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -340,15 +471,53 @@ export default function MedTracker({
             </div>
 
             <div className="flex flex-col space-y-1">
-              <label className="text-[10px] text-slate-400 font-semibold uppercase">Alert Phone Number</label>
+              <label className="text-[10px] text-slate-400 font-semibold uppercase">Specific Alarm Time (Optional)</label>
               <input 
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. +1 (555) 019-9482"
-                className="input-field py-2 text-xs"
+                type="time"
+                value={customTime}
+                onChange={(e) => setCustomTime(e.target.value)}
+                className="input-field py-2 text-xs cursor-pointer text-slate-200"
               />
             </div>
+
+            <div className="flex items-center gap-2 py-1">
+              <input 
+                type="checkbox"
+                id="enableSms"
+                checked={enableSms}
+                onChange={(e) => setEnableSms(e.target.checked)}
+                className="w-4 h-4 rounded border-dark-700 bg-dark-950 text-neon-mint focus:ring-neon-mint/30 cursor-pointer"
+              />
+              <label htmlFor="enableSms" className="text-[10px] text-slate-300 font-bold uppercase tracking-wider cursor-pointer">
+                Send Telegram Bot Alerts
+              </label>
+            </div>
+
+            {enableSms && (
+              <div className="space-y-4 border-l-2 border-neon-mint/35 pl-3.5 mt-2 animate-slide-up">
+                <div className="flex flex-col space-y-1">
+                  <label className="text-[10px] text-slate-400 font-semibold uppercase">Alert Phone Number (Optional)</label>
+                  <input 
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +1 (555) 019-9482"
+                    className="input-field py-2 text-xs"
+                  />
+                </div>
+                
+                <div className="flex flex-col space-y-1">
+                  <label className="text-[10px] text-slate-400 font-semibold uppercase">Custom Telegram Reminder Message</label>
+                  <textarea 
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    placeholder="e.g. Remember to take Simvastatin now with warm water. Drink plenty of fluids."
+                    rows="2"
+                    className="input-field py-2 text-xs text-slate-200 resize-none"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Safety Audit display inside form */}
             {interactionWarning && (

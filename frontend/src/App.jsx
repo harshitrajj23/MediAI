@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Activity,
@@ -33,6 +33,7 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [elderlyMode, setElderlyMode] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const sentRemindersRef = useRef(new Set());
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -57,6 +58,70 @@ export default function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Automated Medication Reminder Scheduler Hook
+  useEffect(() => {
+    if (!session || medications.length === 0) return;
+
+    const checkReminders = async () => {
+      const now = new Date();
+      
+      // Format current time as "hh:mm AM/PM" to match our alarm strings
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+      
+      const dateString = now.toDateString(); // e.g. "Thu May 28 2026"
+
+      medications.forEach(async (med) => {
+        let alarmTime = "";
+        let alarmMessage = "";
+        
+        if (Array.isArray(med.timing)) {
+          med.timing.forEach(t => {
+            if (t.startsWith("time:")) alarmTime = t.substring(5);
+            else if (t.startsWith("msg:")) alarmMessage = t.substring(4);
+          });
+        }
+        
+        // If alarmTime exists and matches the current formatted time, and is not already sent
+        if (alarmTime && alarmTime === formattedTime) {
+          const reminderKey = `${med.id}_${alarmTime}_${dateString}`;
+          if (sentRemindersRef.current.has(reminderKey)) return;
+          
+          sentRemindersRef.current.add(reminderKey);
+          
+          try {
+            const msgText = `🔔 Automated MediAI Reminder:\nTime to take your ${med.name} (${med.dosage})!\nScheduled Time: ${alarmTime}\nMessage: "${alarmMessage || 'Please take your prescription.'}"`;
+            
+            console.log(`[AUTOMATED SCHEDULER] Triggering reminder for ${med.name} at ${alarmTime}`);
+            
+            const response = await fetch("http://127.0.0.1:8000/api/medications/remind", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: msgText })
+            });
+            
+            if (response.ok) {
+              console.log(`[AUTOMATED SCHEDULER] Successfully dispatched alert for ${med.name}`);
+            } else {
+              console.error("[AUTOMATED SCHEDULER] Failed to dispatch alert");
+            }
+          } catch (err) {
+            console.error("[AUTOMATED SCHEDULER] Error sending automated reminder:", err);
+          }
+        }
+      });
+    };
+
+    // Check immediately and then poll every 10 seconds
+    checkReminders();
+    const interval = setInterval(checkReminders, 10000);
+    return () => clearInterval(interval);
+  }, [session, medications]);
 
   const fetchProfile = async (userId) => {
     try {

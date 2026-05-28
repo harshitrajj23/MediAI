@@ -241,19 +241,38 @@ export default function Dashboard({
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {medications.slice(0, 3).map(med => (
-                  <div key={med.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 flex items-center justify-between">
-                    <div>
-                      <span className="text-sm font-medium text-white block">{med.name}</span>
-                      <span className="text-xs text-slate-500">{med.dosage}</span>
+                {medications.slice(0, 3).map(med => {
+                  const frequencies = [];
+                  let timeVal = "";
+                  
+                  if (Array.isArray(med.timing)) {
+                    med.timing.forEach(t => {
+                      if (t.startsWith("time:")) timeVal = t.substring(5);
+                      else if (!t.startsWith("msg:")) frequencies.push(t);
+                    });
+                  }
+                  
+                  return (
+                    <div key={med.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-white block">{med.name}</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-slate-500">{med.dosage}</span>
+                          {timeVal && (
+                            <span className="text-[9px] text-neon-mint flex items-center gap-1 bg-neon-mint/10 border border-neon-mint/20 px-1.5 py-0.5 rounded font-bold animate-pulse">
+                              <Clock className="w-2.5 h-2.5" /> {timeVal}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {frequencies.map((freq, i) => (
+                          <span key={i} className="text-[10px] bg-white/[0.06] text-slate-300 px-2 py-0.5 rounded-full font-medium">{freq}</span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      {med.timing?.map((t, i) => (
-                        <span key={i} className="text-[10px] bg-white/[0.06] text-slate-300 px-2 py-0.5 rounded-full font-medium">{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           )}

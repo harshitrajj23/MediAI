@@ -19,6 +19,12 @@ export default {
           mint: "#10b981",
           bright: "#4ade80",
           glow: "#86efac",
+        },
+        medical: {
+          blue: "#3b82f6",
+          light: "#60a5fa",
+          dark: "#1e3a8a",
+          glow: "#bfdbfe"
         }
       },
       boxShadow: {

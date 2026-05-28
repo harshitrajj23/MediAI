@@ -81,7 +81,7 @@ export default function SymptomChat({
   const saveMessageToSupabase = async (role, content, triage = null) => {
     if (!session?.user?.id) return;
     try {
-      await supabase.from('chats').insert([
+      const { error } = await supabase.from('chats').insert([
         {
           user_id: session.user.id,
           role,
@@ -89,6 +89,9 @@ export default function SymptomChat({
           triage
         }
       ]);
+      if (error) {
+        console.error("Error saving message to Supabase:", error);
+      }
     } catch (err) {
       console.error("Error saving message to Supabase:", err);
     }

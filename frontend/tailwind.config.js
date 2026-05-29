@@ -38,6 +38,8 @@ export default {
         'blink-red': 'blinkRed 1.5s infinite ease-in-out',
         'fade-in': 'fadeIn 0.4s ease-out forwards',
         'slide-up': 'slideUp 0.5s ease-out forwards',
+        'shimmer': 'shimmer 3s linear infinite',
+        'float-subtle': 'floatSubtle 6s ease-in-out infinite',
       },
       keyframes: {
         pulseGlow: {
@@ -55,6 +57,14 @@ export default {
         slideUp: {
           '0%': { opacity: 0, transform: 'translateY(20px)' },
           '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        floatSubtle: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-4px)' },
         }
       }
     },

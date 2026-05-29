@@ -552,34 +552,51 @@ export default function Dashboard({
     show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } }
   };
 
-  return (
-    <div className="space-y-8 pb-12">
+  // Compute health index for stats ribbon
+  const healthyCount = Object.values(bodyStates).filter(s => s === 'healthy').length;
+  const healthIndex = Math.round((healthyCount / Object.keys(bodyStates).length) * 100);
 
-      {/* GOD-LEVEL SYSTEM HEADER BAR */}
+  const statCards = [
+    { icon: MessageSquare, value: chatsHistory.length, label: 'Diagnostic Scans', sub: 'Symptom evaluations', gradient: 'from-neon-green/20 via-emerald-500/20 to-neon-green/20', iconColor: 'text-neon-green', iconBg: 'bg-neon-green/10' },
+    { icon: Pill, value: medications.length, label: 'Active Medications', sub: 'Scheduled alarms', gradient: 'from-fuchsia-500/20 via-purple-500/20 to-fuchsia-500/20', iconColor: 'text-fuchsia-400', iconBg: 'bg-fuchsia-500/10' },
+    { icon: CalendarDays, value: consultations.length, label: 'Consultations', sub: 'Doctors matched', gradient: 'from-amber-500/20 via-orange-500/20 to-amber-500/20', iconColor: 'text-amber-400', iconBg: 'bg-amber-500/10' },
+    { icon: HeartPulse, value: `${healthIndex}%`, label: 'Health Index', sub: `${healthyCount}/${Object.keys(bodyStates).length} systems clear`, gradient: 'from-cyan-500/20 via-blue-500/20 to-cyan-500/20', iconColor: 'text-cyan-400', iconBg: 'bg-cyan-500/10' },
+  ];
+
+  return (
+    <div className="space-y-6 pb-12">
+
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* PREMIUM SYSTEM HEADER                                 */}
+      {/* ═══════════════════════════════════════════════════════ */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }} 
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-dark-900/40 backdrop-blur-xl border border-white/[0.04] p-6 rounded-3xl"
+        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative"
       >
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-neon-green/10 text-neon-green border border-neon-green/20 animate-pulse">
-              System Active
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-lg bg-neon-green/10 text-neon-green border border-neon-green/20 animate-pulse">
+              System Online
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">MediAI Patient HUD v1.2.0</span>
+            <span className="text-[10px] text-slate-500 font-mono hidden sm:inline">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
+            </span>
           </div>
-          <h1 className="outfit-font font-bold text-white tracking-tight text-2xl">
-            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}{userProfile?.name ? `, ${userProfile.name.split(' ')[0]}` : ''}
+          <h1 className="outfit-font font-bold tracking-tight text-3xl">
+            <span className="text-white">Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}</span>
+            {userProfile?.name && <span className="text-gradient-green">, {userProfile.name.split(' ')[0]}</span>}
           </h1>
+          <p className="text-slate-500 text-xs mt-1.5 max-w-md">Your clinical health command center. All diagnostic systems active and monitoring.</p>
         </div>
         
-        {/* Hacker-esque active logs terminal in header */}
-        <div className="hidden lg:flex items-center gap-6 bg-dark-950/80 border border-dark-800 rounded-xl px-4 py-2.5 max-w-sm">
+        {/* Compact terminal status chip */}
+        <div className="hidden lg:flex items-center gap-3 bg-dark-900/60 backdrop-blur-xl border border-white/[0.04] rounded-xl px-4 py-2.5 max-w-xs">
           <Terminal className="w-3.5 h-3.5 text-neon-green shrink-0" />
-          <div className="text-[10px] font-mono text-slate-400 w-56 truncate">
+          <div className="text-[10px] font-mono text-slate-400 truncate">
             {terminalLogs.length > 0 ? (
-              <span className="animate-fade-in text-slate-300">
-                <span className="text-neon-green mr-1.5">[{terminalLogs[0].time}]</span>
+              <span className="animate-fade-in">
+                <span className="text-neon-green mr-1">[{terminalLogs[0].time}]</span>
                 {terminalLogs[0].text}
               </span>
             ) : "Syncing health network..."}
@@ -588,22 +605,22 @@ export default function Dashboard({
         </div>
       </motion.div>
 
-
-
-      {/* NAVIGATION TABS */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* GREEN GLASSMORPHIC TABS                                */}
+      {/* ═══════════════════════════════════════════════════════ */}
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }}
-        className="flex gap-1.5 p-1 bg-dark-950/80 border border-white/[0.04] rounded-2xl w-fit"
+        className="flex gap-1.5 p-1 bg-dark-900/40 backdrop-blur-xl border border-neon-green/10 rounded-2xl w-fit"
       >
         {['overview', 'profile'].map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-6 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 capitalize ${
+            className={`px-6 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-300 capitalize ${
               tab === t 
-                ? 'bg-white/10 text-white shadow-inner border border-white/[0.03]' 
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'bg-neon-green/10 text-neon-green border-neon-green/20 shadow-[0_0_15px_rgba(34,197,94,0.08)]' 
+                : 'text-slate-500 hover:text-slate-300 border-transparent'
             }`}
           >
             {t === 'overview' ? 'Agent HUD Overview' : 'Patient Records & Logs'}
@@ -611,295 +628,351 @@ export default function Dashboard({
         ))}
       </motion.div>
 
-      {/* OVERVIEW PANEL */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* OVERVIEW PANEL                                         */}
+      {/* ═══════════════════════════════════════════════════════ */}
       {tab === 'overview' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="space-y-6">
           
-          {/* COLUMN 1: Cybernetic 3D Point-Cloud Scanner (4 columns) */}
-          <div className="lg:col-span-4 bg-dark-900/30 backdrop-blur-xl border border-white/[0.04] p-6 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[520px]">
-            <div className="absolute left-[-20%] top-[-20%] w-[60%] h-[60%] rounded-full bg-neon-green/5 blur-[80px]" />
-            <div className="absolute right-[-20%] bottom-[-20%] w-[60%] h-[60%] rounded-full bg-cyan-500/5 blur-[80px]" />
-            
-            <div className="flex items-center justify-between border-b border-white/[0.04] pb-4 mb-4 z-10">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
-                <div>
-                  <span className="text-[8px] font-extrabold uppercase tracking-widest text-neon-green block">Bio-Constellation Scan</span>
-                  <h3 className="outfit-font font-bold text-white tracking-tight text-base mt-0.5">Interactive Bio-Scanner</h3>
-                </div>
-              </div>
-              <Activity className="w-4 h-4 text-neon-green animate-pulse" />
-            </div>
-
-            {/* Scanning laser beam animation */}
-            <div className="absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-neon-green/45 to-transparent animate-[scan_4s_ease-in-out_infinite] pointer-events-none select-none z-10" />
-
-            <div className="relative flex-1 flex items-center justify-center py-2">
-              {/* Left Side Labels Overlay */}
-              <div className="absolute left-0 top-0 bottom-0 w-[55px] flex flex-col justify-between py-4 text-left select-none z-20">
-                {Object.keys(BODY_PARTS).filter(k => BODY_PARTS[k].side === 'left').map(k => {
-                  const p = BODY_PARTS[k];
-                  const state = bodyStates[k];
-                  const color = state === 'active' ? 'text-red-400' : state === 'medication' ? 'text-amber-400' : 'text-slate-500';
-                  
-                  return (
-                    <button 
-                      key={`sidebar-${k}`} 
-                      className="text-left py-1 hover:text-white transition-all select-all animate-fade-in"
-                      onClick={() => setSelectedPart(k)}
-                    >
-                      <span className={`text-[9px] font-mono font-black uppercase tracking-wider block truncate ${color}`}>
-                        {p.label.split(" / ")[0]}
-                      </span>
-                      <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-widest block font-mono mt-0.5">
-                        {state === 'active' ? '🔴 Active' : state === 'medication' ? '🟡 Meds' : '🟢 Healthy'}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Holographic Body Canvas */}
-              {renderSvgBody()}
-
-              {/* Right Side Labels Overlay */}
-              <div className="absolute right-0 top-0 bottom-0 w-[55px] flex flex-col justify-between py-4 text-right select-none z-20">
-                {Object.keys(BODY_PARTS).filter(k => BODY_PARTS[k].side === 'right').map(k => {
-                  const p = BODY_PARTS[k];
-                  const state = bodyStates[k];
-                  const color = state === 'active' ? 'text-red-400' : state === 'medication' ? 'text-amber-400' : 'text-slate-500';
-                  
-                  return (
-                    <button 
-                      key={`sidebar-${k}`} 
-                      className="text-right py-1 hover:text-white transition-all select-all animate-fade-in"
-                      onClick={() => setSelectedPart(k)}
-                    >
-                      <span className={`text-[9px] font-mono font-black uppercase tracking-wider block truncate ${color}`}>
-                        {p.label.split(" / ")[0]}
-                      </span>
-                      <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-widest block font-mono mt-0.5">
-                        {state === 'active' ? '🔴 Active' : state === 'medication' ? '🟡 Meds' : '🟢 Healthy'}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="border-t border-white/[0.04] pt-3 text-center z-10">
-              <p className="text-[9px] text-slate-500 font-mono tracking-tight">
-                Anatomical nodes synced live to patient health records.
-              </p>
-            </div>
-          </div>
-
-          {/* COLUMN 2: Triage Alert & Active Diagnostic HUD (5 columns) */}
-          <div className="lg:col-span-5 flex flex-col justify-between gap-6 min-h-[520px]">
-            
-            {/* CLINICAL TRIAGE STATUS GLOW CARD */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`relative overflow-hidden bg-dark-900/20 backdrop-blur-xl border rounded-3xl p-6 flex-1 flex flex-col justify-center transition-all duration-500 ${tc.bg} ${tc.border} ${tc.glow}`}
-            >
-              <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full filter blur-[40px] opacity-10 bg-white" />
-
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${tc.dot} ${lastTriage.urgency === 'Emergency' ? 'animate-ping' : ''}`} />
-                    <span className={`text-[10px] font-extrabold uppercase tracking-widest ${tc.text}`}>
-                      {tc.label}
-                    </span>
-                  </div>
-                  <h3 className="outfit-font text-xl font-bold text-white tracking-tight mt-1">
-                    {lastTriage.urgency === 'None' ? 'Scan Awaiting Symptom Input' : lastTriage.urgency}
-                  </h3>
-                  <p className="text-slate-400 text-xs leading-relaxed">
-                    {lastTriage.explanation}
-                  </p>
-                </div>
-
-                {lastTriage.urgency !== 'None' && (
-                  <div className="flex flex-col items-center sm:items-end gap-1 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl shrink-0 self-stretch sm:self-auto justify-center text-center">
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Clinical Score</span>
-                    <span className={`text-2xl font-black ${tc.text} font-mono mt-0.5`}>
-                      {lastTriage.score}%
-                    </span>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-
-            {/* DYNAMIC QUICK ACTIONS GRID */}
-            <div className="space-y-4 flex-1 flex flex-col justify-end">
-              <h2 className="outfit-font text-sm font-bold text-slate-400 uppercase tracking-widest">Active Diagnostic HUD</h2>
-              <motion.div 
-                variants={stagger} 
-                initial="hidden" 
-                animate="show" 
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-              >
-                {features.map(f => {
-                  const Icon = f.icon;
-                  return (
-                    <motion.button
-                      key={f.id}
-                      variants={fadeUp}
-                      onClick={() => setView(f.id, f.speak)}
-                      className="bg-dark-900/30 backdrop-blur-xl border border-white/[0.04] p-5 rounded-3xl text-left group relative overflow-hidden transition-all duration-300 hover:border-white/[0.12] hover:bg-dark-900/50"
-                    >
-                      <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <ArrowUpRight className="w-4 h-4 text-slate-400" />
+          {/* ──── HERO STATS RIBBON ──── */}
+          <motion.div 
+            variants={stagger} 
+            initial="hidden" 
+            animate="show" 
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {statCards.map((stat, i) => {
+              const StatIcon = stat.icon;
+              return (
+                <motion.div key={i} variants={fadeUp} className="relative group">
+                  {/* Gradient border glow on hover */}
+                  <div className={`absolute -inset-[1px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-[2px]`} />
+                  <div className="relative bg-dark-900/60 backdrop-blur-xl border border-white/[0.04] rounded-2xl p-5 group-hover:border-transparent transition-all duration-500">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`w-9 h-9 rounded-xl ${stat.iconBg} flex items-center justify-center`}>
+                        <StatIcon className={`w-4 h-4 ${stat.iconColor}`} />
                       </div>
-                      
-                      <div className="flex items-center justify-between mb-4">
-                        <div className={`w-10 h-10 rounded-2xl ${f.bgColor} flex items-center justify-center`}>
-                          <Icon className={`w-4.5 h-4.5 ${f.color}`} />
-                        </div>
-                        <span className={`px-2 py-0.5 text-[8px] font-bold rounded border uppercase ${f.badgeColor}`}>
-                          {f.badge}
-                        </span>
-                      </div>
-                      
-                      <h3 className="font-bold text-white mb-1.5 text-xs tracking-tight">{f.title}</h3>
-                      <p className="text-slate-400 leading-relaxed text-[11px]">{f.desc}</p>
-                    </motion.button>
-                  );
-                })}
-              </motion.div>
-            </div>
-          </div>
-
-          {/* COLUMN 3: Virtual telemedicine Consultation & Adherence Scheduler (3 columns) */}
-          <div className="lg:col-span-3 flex flex-col justify-between gap-6 min-h-[520px]">
-            
-            {/* TELEHEALTH ROOM LIVE DISPATCH */}
-            <motion.div 
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-gradient-to-br from-indigo-950/40 via-dark-900/30 to-dark-900/20 backdrop-blur-xl border border-indigo-500/20 rounded-3xl p-6 flex-1 flex flex-col justify-between overflow-hidden"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span className="text-[8px] font-extrabold uppercase tracking-widest text-indigo-400 px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 animate-pulse">
-                    Live Telehealth Portal
-                  </span>
-                  <h3 className="outfit-font font-bold text-white tracking-tight text-sm mt-2">telemedicine Rooms</h3>
-                </div>
-                <Video className="w-4.5 h-4.5 text-indigo-400 animate-pulse" />
-              </div>
-
-              {consultations.length === 0 ? (
-                <div className="py-6 text-center border border-white/[0.04] rounded-2xl bg-dark-950/30 flex-1 flex flex-col justify-center items-center">
-                  <p className="text-xs text-slate-500">No virtual consultations scheduled.</p>
-                  <button 
-                    onClick={() => setView('docs', 'Appointments')}
-                    className="text-[10px] text-indigo-400 font-bold hover:text-white mt-2 transition-colors inline-flex items-center gap-1"
-                  >
-                    Match specialists <ArrowRight className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-3 flex-1 flex flex-col justify-center">
-                  {consultations.slice(0, 2).map((consult, i) => (
-                    <div key={consult.id || i} className="bg-dark-950/60 border border-white/[0.03] rounded-2xl p-4 flex flex-col gap-3 relative group">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <span className="text-xs font-bold text-white block">{consult.doctor_name}</span>
-                          <span className="text-[10px] text-slate-500 block mt-0.5">{consult.specialty}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] font-bold text-indigo-400 block">{consult.time}</span>
-                          <span className="text-[9px] text-slate-500 block mt-0.5">{consult.date}</span>
-                        </div>
-                      </div>
-                      
-                      {consult.zoom_link && (
-                        <a 
-                          href={consult.zoom_link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="w-full py-2 px-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-semibold text-[10px] transition-all flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(99,102,241,0.2)]"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" /> Launch Video Consult Room
-                        </a>
-                      )}
+                      <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{stat.label}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
+                    <span className="text-2xl font-black text-white font-mono block">{stat.value}</span>
+                    <span className="text-[10px] text-slate-500 mt-1 block">{stat.sub}</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
 
-            {/* TODAY'S PRESCRIPTIONS TRACKER */}
-            <motion.div 
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-dark-900/30 backdrop-blur-xl border border-white/[0.04] rounded-3xl p-6 flex-1 flex flex-col justify-between"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="outfit-font text-sm font-bold text-slate-400 uppercase tracking-widest text-xs">Pill timeline</h3>
-                {medications.length > 0 && (
-                  <button onClick={() => setView('meds', 'Medications')} className="text-[10px] text-neon-green hover:text-white transition-colors flex items-center gap-1 font-bold">
-                    View ({medications.length}) <ArrowRight className="w-2.5 h-2.5" />
-                  </button>
-                )}
+          {/* ──── MAIN BENTO GRID ──── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* ═══════ BIO-SCANNER PANEL (5 columns) ═══════ */}
+            <div className="lg:col-span-5 bg-dark-900/30 backdrop-blur-xl border border-white/[0.04] p-6 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[560px]">
+              <div className="absolute left-[-20%] top-[-20%] w-[60%] h-[60%] rounded-full bg-neon-green/5 blur-[80px]" />
+              <div className="absolute right-[-20%] bottom-[-20%] w-[60%] h-[60%] rounded-full bg-cyan-500/5 blur-[80px]" />
+              
+              <div className="flex items-center justify-between border-b border-white/[0.04] pb-4 mb-4 z-10">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
+                  <div>
+                    <span className="text-[8px] font-extrabold uppercase tracking-widest text-neon-green block">Radiographic Bio-Scan</span>
+                    <h3 className="outfit-font font-bold text-white tracking-tight text-base mt-0.5">Interactive X-Ray Scanner</h3>
+                  </div>
+                </div>
+                <Activity className="w-4 h-4 text-neon-green animate-pulse" />
               </div>
 
-              {medications.length === 0 ? (
-                <div className="py-8 text-center border border-white/[0.04] rounded-2xl bg-dark-950/30 flex-1 flex flex-col justify-center items-center">
-                  <p className="text-xs text-slate-500">No scheduled prescriptions.</p>
-                  <button 
-                    onClick={() => setView('meds', 'Medications')}
-                    className="text-[10px] text-neon-green font-bold hover:text-white mt-2 transition-colors inline-flex items-center gap-1"
-                  >
-                    Set alarm <ArrowRight className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2 flex-1 overflow-y-auto max-h-[180px]">
-                  {medications.slice(0, 3).map(med => {
-                    const frequencies = [];
-                    let timeVal = "";
-                    let isTelegram = false;
-                    
-                    if (Array.isArray(med.timing)) {
-                      med.timing.forEach(t => {
-                        if (t.startsWith("time:")) timeVal = t.substring(5);
-                        else if (t.startsWith("msg:")) isTelegram = true;
-                        else frequencies.push(t);
-                      });
-                    }
+              {/* Scanning laser beam animation */}
+              <div className="absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-neon-green/45 to-transparent animate-[scan_4s_ease-in-out_infinite] pointer-events-none select-none z-10" />
+
+              <div className="relative flex-1 flex items-center justify-center py-2">
+                {/* Left Side Labels Overlay */}
+                <div className="absolute left-0 top-0 bottom-0 w-[55px] flex flex-col justify-between py-4 text-left select-none z-20">
+                  {Object.keys(BODY_PARTS).filter(k => BODY_PARTS[k].side === 'left').map(k => {
+                    const p = BODY_PARTS[k];
+                    const state = bodyStates[k];
+                    const color = state === 'active' ? 'text-red-400' : state === 'medication' ? 'text-amber-400' : 'text-slate-500';
                     
                     return (
-                      <div key={med.id} className="bg-dark-950/50 border border-white/[0.03] rounded-2xl p-3 flex items-center justify-between hover:border-white/[0.08] transition-all duration-200">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-white block">{med.name}</span>
+                      <button 
+                        key={`sidebar-${k}`} 
+                        className="text-left py-1 hover:text-white transition-all select-all animate-fade-in"
+                        onClick={() => setSelectedPart(k)}
+                      >
+                        <span className={`text-[9px] font-mono font-black uppercase tracking-wider block truncate ${color}`}>
+                          {p.label.split(" / ")[0]}
+                        </span>
+                        <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-widest block font-mono mt-0.5">
+                          {state === 'active' ? '🔴 Active' : state === 'medication' ? '🟡 Meds' : '🟢 Healthy'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Holographic Body Canvas */}
+                {renderSvgBody()}
+
+                {/* Right Side Labels Overlay */}
+                <div className="absolute right-0 top-0 bottom-0 w-[55px] flex flex-col justify-between py-4 text-right select-none z-20">
+                  {Object.keys(BODY_PARTS).filter(k => BODY_PARTS[k].side === 'right').map(k => {
+                    const p = BODY_PARTS[k];
+                    const state = bodyStates[k];
+                    const color = state === 'active' ? 'text-red-400' : state === 'medication' ? 'text-amber-400' : 'text-slate-500';
+                    
+                    return (
+                      <button 
+                        key={`sidebar-${k}`} 
+                        className="text-right py-1 hover:text-white transition-all select-all animate-fade-in"
+                        onClick={() => setSelectedPart(k)}
+                      >
+                        <span className={`text-[9px] font-mono font-black uppercase tracking-wider block truncate ${color}`}>
+                          {p.label.split(" / ")[0]}
+                        </span>
+                        <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-widest block font-mono mt-0.5">
+                          {state === 'active' ? '🔴 Active' : state === 'medication' ? '🟡 Meds' : '🟢 Healthy'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="border-t border-white/[0.04] pt-3 text-center z-10">
+                <p className="text-[9px] text-slate-500 font-mono tracking-tight">
+                  Anatomical nodes synced live to patient health records.
+                </p>
+              </div>
+            </div>
+
+            {/* ═══════ RIGHT CONTENT COLUMN (7 columns) ═══════ */}
+            <div className="lg:col-span-7 flex flex-col gap-5">
+              
+              {/* ──── TOP ROW: Triage + Telehealth side-by-side ──── */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                
+                {/* TRIAGE STATUS CARD */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`relative overflow-hidden bg-dark-900/20 backdrop-blur-xl border rounded-3xl p-5 flex flex-col justify-between transition-all duration-500 ${tc.bg} ${tc.border} ${tc.glow}`}
+                >
+                  {/* Decorative top accent line */}
+                  <div className={`absolute top-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent ${
+                    tc.text === 'text-red-400' ? 'via-red-500/60' : 
+                    tc.text === 'text-amber-400' ? 'via-amber-500/60' : 
+                    tc.text === 'text-emerald-400' ? 'via-emerald-500/60' : 'via-slate-500/20'
+                  } to-transparent`} />
+                  <div className="absolute -right-12 -top-12 w-24 h-24 rounded-full filter blur-[30px] opacity-10 bg-white" />
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${tc.dot} ${lastTriage.urgency === 'Emergency' ? 'animate-ping' : ''}`} />
+                      <span className={`text-[9px] font-extrabold uppercase tracking-widest ${tc.text}`}>
+                        {tc.label}
+                      </span>
+                    </div>
+                    <h3 className="outfit-font text-lg font-bold text-white tracking-tight">
+                      {lastTriage.urgency === 'None' ? 'Awaiting Input' : lastTriage.urgency}
+                    </h3>
+                    <p className="text-slate-400 text-[11px] leading-relaxed line-clamp-2">
+                      {lastTriage.explanation}
+                    </p>
+                  </div>
+
+                  {lastTriage.urgency !== 'None' && (
+                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Clinical Score</span>
+                      <span className={`text-xl font-black ${tc.text} font-mono`}>
+                        {lastTriage.score}%
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* TELEHEALTH PORTAL CARD */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="relative overflow-hidden bg-gradient-to-br from-indigo-950/40 via-dark-900/30 to-dark-900/20 backdrop-blur-xl border border-indigo-500/20 rounded-3xl p-5 flex flex-col justify-between"
+                >
+                  {/* Decorative top accent line */}
+                  <div className="absolute top-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+                  
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <span className="text-[8px] font-extrabold uppercase tracking-widest text-indigo-400 px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 animate-pulse">
+                        Live Portal
+                      </span>
+                      <h3 className="outfit-font font-bold text-white tracking-tight text-sm mt-2">Telemedicine Rooms</h3>
+                    </div>
+                    <Video className="w-4 h-4 text-indigo-400 animate-pulse" />
+                  </div>
+
+                  {consultations.length === 0 ? (
+                    <div className="py-4 text-center border border-white/[0.04] rounded-2xl bg-dark-950/30 flex-1 flex flex-col justify-center items-center">
+                      <p className="text-[11px] text-slate-500">No consultations scheduled.</p>
+                      <button 
+                        onClick={() => setView('docs', 'Appointments')}
+                        className="text-[10px] text-indigo-400 font-bold hover:text-white mt-2 transition-colors inline-flex items-center gap-1"
+                      >
+                        Match specialists <ArrowRight className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 flex-1 flex flex-col justify-center">
+                      {consultations.slice(0, 2).map((consult, i) => (
+                        <div key={consult.id || i} className="bg-dark-950/60 border border-white/[0.03] rounded-2xl p-3 flex flex-col gap-2">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-[11px] font-bold text-white block">{consult.doctor_name}</span>
+                              <span className="text-[10px] text-slate-500 block mt-0.5">{consult.specialty}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] font-bold text-indigo-400 block">{consult.time}</span>
+                              <span className="text-[9px] text-slate-500 block mt-0.5">{consult.date}</span>
+                            </div>
+                          </div>
+                          {consult.zoom_link && (
+                            <a 
+                              href={consult.zoom_link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="w-full py-1.5 px-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-semibold text-[10px] transition-all flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(99,102,241,0.2)]"
+                            >
+                              <ExternalLink className="w-3 h-3" /> Launch Consult
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+
+              {/* ──── FEATURE ACTION CARDS (2x2) ──── */}
+              <div className="space-y-3">
+                <h2 className="outfit-font text-xs font-bold text-slate-400 uppercase tracking-widest">Diagnostic Modules</h2>
+                <motion.div 
+                  variants={stagger} 
+                  initial="hidden" 
+                  animate="show" 
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                >
+                  {features.map(f => {
+                    const FeatureIcon = f.icon;
+                    const gradientColors = {
+                      'chat': 'from-neon-green/25 via-emerald-500/25 to-neon-green/25',
+                      'vision': 'from-cyan-400/25 via-blue-500/25 to-cyan-400/25',
+                      'meds': 'from-fuchsia-500/25 via-purple-500/25 to-fuchsia-500/25',
+                      'docs': 'from-amber-500/25 via-orange-500/25 to-amber-500/25'
+                    };
+                    const accentColors = {
+                      'chat': 'via-neon-green/40',
+                      'vision': 'via-cyan-400/40',
+                      'meds': 'via-fuchsia-400/40',
+                      'docs': 'via-amber-400/40'
+                    };
+                    return (
+                      <motion.button
+                        key={f.id}
+                        variants={fadeUp}
+                        onClick={() => setView(f.id, f.speak)}
+                        className="relative group text-left"
+                      >
+                        {/* Animated gradient border on hover */}
+                        <div className={`absolute -inset-[1px] bg-gradient-to-r ${gradientColors[f.id] || ''} rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-[2px]`} />
+                        <div className="relative bg-dark-900/40 backdrop-blur-xl border border-white/[0.04] p-5 rounded-3xl overflow-hidden group-hover:border-transparent transition-all duration-500">
+                          <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                          </div>
+                          
+                          <div className="flex items-center justify-between mb-4">
+                            <div className={`w-10 h-10 rounded-2xl ${f.bgColor} flex items-center justify-center`}>
+                              <FeatureIcon className={`w-4.5 h-4.5 ${f.color}`} />
+                            </div>
+                            <span className={`px-2 py-0.5 text-[8px] font-bold rounded-lg border uppercase ${f.badgeColor}`}>
+                              {f.badge}
+                            </span>
+                          </div>
+                          
+                          <h3 className="font-bold text-white mb-1.5 text-xs tracking-tight">{f.title}</h3>
+                          <p className="text-slate-400 leading-relaxed text-[11px]">{f.desc}</p>
+                          
+                          {/* Bottom accent bar */}
+                          <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent ${accentColors[f.id] || ''} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </motion.div>
+              </div>
+
+              {/* ──── PILL TIMELINE (horizontal) ──── */}
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="bg-dark-900/30 backdrop-blur-xl border border-white/[0.04] rounded-3xl p-5"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Pill className="w-4 h-4 text-fuchsia-400" />
+                    <h3 className="outfit-font text-xs font-bold text-slate-400 uppercase tracking-widest">Pill Timeline</h3>
+                  </div>
+                  {medications.length > 0 && (
+                    <button onClick={() => setView('meds', 'Medications')} className="text-[10px] text-neon-green hover:text-white transition-colors flex items-center gap-1 font-bold">
+                      View all ({medications.length}) <ArrowRight className="w-2.5 h-2.5" />
+                    </button>
+                  )}
+                </div>
+
+                {medications.length === 0 ? (
+                  <div className="py-6 text-center border border-white/[0.04] rounded-2xl bg-dark-950/30">
+                    <p className="text-[11px] text-slate-500">No scheduled prescriptions.</p>
+                    <button 
+                      onClick={() => setView('meds', 'Medications')}
+                      className="text-[10px] text-neon-green font-bold hover:text-white mt-2 transition-colors inline-flex items-center gap-1"
+                    >
+                      Set alarm <ArrowRight className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
+                    {medications.slice(0, 5).map(med => {
+                      let timeVal = "";
+                      let isTelegram = false;
+                      
+                      if (Array.isArray(med.timing)) {
+                        med.timing.forEach(t => {
+                          if (t.startsWith("time:")) timeVal = t.substring(5);
+                          else if (t.startsWith("msg:")) isTelegram = true;
+                        });
+                      }
+                      
+                      return (
+                        <div key={med.id} className="min-w-[180px] bg-dark-950/50 border border-white/[0.03] rounded-2xl p-3.5 hover:border-white/[0.08] transition-all duration-200 shrink-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-bold text-white">{med.name}</span>
                             {isTelegram && (
-                              <span className="text-[8px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1 py-0.5 rounded font-extrabold uppercase font-mono tracking-wider">
+                              <span className="text-[7px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1 py-0.5 rounded font-extrabold uppercase font-mono">
                                 BOT
                               </span>
                             )}
                           </div>
-                          
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] text-slate-500">{med.dosage}</span>
-                            {timeVal && (
-                              <span className="text-[9px] text-neon-green flex items-center gap-1 bg-neon-green/10 border border-neon-green/20 px-1.5 py-0.5 rounded font-bold animate-pulse">
-                                <Clock className="w-2.5 h-2.5" /> {timeVal}
-                              </span>
-                            )}
-                          </div>
+                          <span className="text-[10px] text-slate-500 block">{med.dosage}</span>
+                          {timeVal && (
+                            <span className="text-[9px] text-neon-green flex items-center gap-1 bg-neon-green/10 border border-neon-green/20 px-1.5 py-0.5 rounded font-bold mt-2 w-fit animate-pulse">
+                              <Clock className="w-2.5 h-2.5" /> {timeVal}
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            </div>
           </div>
 
           {/* Glowing blurred glassmorphic overlay modal for anatomical updates */}

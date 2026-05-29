@@ -22,6 +22,7 @@ import VisionLab from './components/VisionLab';
 import MedTracker from './components/MedTracker';
 import DocMatch from './components/DocMatch';
 import LandingPage from './components/LandingPage';
+import NeuralBackground from './components/NeuralBackground';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -178,7 +179,8 @@ export default function App() {
       return <LandingPage onEnterApp={() => setShowLanding(false)} />;
     }
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-950 p-4">
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+        <NeuralBackground />
         <Auth onAuthSuccess={(s) => setSession(s)} />
       </div>
     );
@@ -206,7 +208,8 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-dark-950 text-slate-100 ${elderlyMode ? 'text-lg' : 'text-sm'}`}>
+    <div className={`relative min-h-screen text-slate-100 ${elderlyMode ? 'text-lg' : 'text-sm'}`}>
+      <NeuralBackground />
       
       {/* TOP NAVBAR */}
       <header className="sticky top-0 z-50 bg-dark-950/70 backdrop-blur-xl border-b border-neon-green/15 shadow-[0_4px_30px_rgba(34,197,94,0.04)] bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(34,197,94,0.06),transparent)]">

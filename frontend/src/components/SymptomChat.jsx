@@ -239,6 +239,23 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
       setActiveSpeakingIndex(null);
       addTelemetryLog('Voice Assistant', 'Speech synthesis stopped by user.', 'info');
     }
+  };  const sanitizeMessageContent = (content) => {
+    if (!content) return '';
+    let sanitized = content;
+    // Strip numerical scores
+    sanitized = sanitized.replace(/\(?risk\s+score:\s*\d+(?:\.\d+)?(?:\/100)?%?\)?/gi, '');
+    sanitized = sanitized.replace(/\(?triage\s+score:\s*\d+(?:\.\d+)?(?:\/100)?%?\)?/gi, '');
+    sanitized = sanitized.replace(/\(?risk\s+level:\s*\d+(?:\.\d+)?(?:\/100)?%?\)?/gi, '');
+    sanitized = sanitized.replace(/\(?score:\s*\d+(?:\.\d+)?(?:\/100)?%?\)?/gi, '');
+    sanitized = sanitized.replace(/\b\d+(?:\.\d+)?\/100\b/g, '');
+    
+    // Strip stars, bold, hashtags, underscores
+    sanitized = sanitized.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#/g, '').replace(/_/g, '');
+    
+    // Clean spaces and punctuation spacing
+    sanitized = sanitized.replace(/ {2,}/g, ' ').replace(/ \./g, '.').replace(/ ,/g, ',').replace(/\(\)/g, '');
+    
+    return sanitized.trim();
   };
 
   // Speak message out loud using browser TTS with multilingual auto-detection & toggle
@@ -501,11 +518,11 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
                       </div>
                     )}
                     <div className="whitespace-pre-line text-slate-300">
-                      {msg.content}
+                      {sanitizeMessageContent(msg.content)}
                     </div>
                   </div>
                 ) : (
-                  msg.content
+                  sanitizeMessageContent(msg.content)
                 )}
               </div>
               

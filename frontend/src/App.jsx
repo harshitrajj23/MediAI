@@ -209,23 +209,23 @@ export default function App() {
     <div className={`min-h-screen bg-dark-950 text-slate-100 ${elderlyMode ? 'text-lg' : 'text-sm'}`}>
       
       {/* TOP NAVBAR */}
-      <header className="sticky top-0 z-50 bg-dark-950/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <header className="sticky top-0 z-50 bg-dark-950/70 backdrop-blur-xl border-b border-neon-green/15 shadow-[0_4px_30px_rgba(34,197,94,0.04)] bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(34,197,94,0.06),transparent)]">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between h-16">
             
             {/* Left: Logo + back */}
             <div className="flex items-center gap-4">
               {showBackButton ? (
-                <button onClick={() => navigateTo('dashboard')} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+                <button onClick={() => navigateTo('dashboard')} className="flex items-center gap-2 text-slate-400 hover:text-neon-green transition-colors">
                   <ArrowLeft className="w-4 h-4" />
                   <span className="text-xs font-medium hidden sm:inline">Back</span>
                 </button>
               ) : (
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-neon-green flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-neon-green flex items-center justify-center shadow-[0_0_12px_rgba(34,197,94,0.3)]">
                     <Activity className="w-3.5 h-3.5 text-dark-950" />
                   </div>
-                  <span className="font-bold text-base tracking-tight">MediAI</span>
+                  <span className="font-bold text-base tracking-tight text-white hover:text-neon-green transition-colors cursor-pointer">MediAI</span>
                 </div>
               )}
 
@@ -235,7 +235,7 @@ export default function App() {
             </div>
 
             {/* Center: Nav links (desktop) */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1.5">
               {navItems.map(item => {
                 const Icon = item.icon;
                 const isActive = view === item.id;
@@ -243,10 +243,10 @@ export default function App() {
                   <button
                     key={item.id}
                     onClick={() => navigateTo(item.id, item.speak)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-300 ${
                       isActive
-                        ? 'bg-white/10 text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                        ? 'bg-neon-green/10 text-neon-green border-neon-green/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]'
+                        : 'text-slate-400 border-transparent hover:text-white hover:bg-neon-green/[0.03]'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -310,17 +310,20 @@ export default function App() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-white/[0.06] bg-dark-950/95 backdrop-blur-xl overflow-hidden"
+              className="md:hidden border-t border-neon-green/15 bg-dark-950/90 backdrop-blur-xl overflow-hidden bg-gradient-to-b from-neon-green/[0.02] to-transparent"
             >
-              <div className="px-4 py-3 space-y-1">
+              <div className="px-4 py-3 space-y-1.5">
                 {navItems.map(item => {
                   const Icon = item.icon;
+                  const isActive = view === item.id;
                   return (
                     <button
                       key={item.id}
                       onClick={() => navigateTo(item.id, item.speak)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                        view === item.id ? 'bg-white/10 text-white' : 'text-slate-400'
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold border transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-neon-green/10 text-neon-green border-neon-green/20' 
+                          : 'text-slate-400 border-transparent hover:text-white hover:bg-neon-green/[0.03]'
                       }`}
                     >
                       <Icon className="w-5 h-5" />

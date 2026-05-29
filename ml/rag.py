@@ -682,22 +682,23 @@ RESPONSE INSTRUCTIONS:
 
 {trans['disclaimer']}"""
 
-    # Robust Post-Processing to strictly guarantee NO STARS, NO BOLDING, and NO NUMERICAL RISK/TRIAGE SCORES
+    # Robust Post-Processing to strictly guarantee NO STARS, NO BOLDING, NO HASHTAGS, and NO NUMERICAL RISK/TRIAGE SCORES
     if answer:
         # Remove numerical score references like "(Risk Score: 20.0/100)", "Risk Level: 20/100", "(Score: 20%)", etc.
-        answer = re.sub(r'\(?Risk\s+Score:\s*\d+(?:\.\d+)?/\d+\)?', '', answer, flags=re.IGNORECASE)
-        answer = re.sub(r'\(?Triage\s+Score:\s*\d+(?:\.\d+)?/\d+\)?', '', answer, flags=re.IGNORECASE)
-        answer = re.sub(r'\(?Risk\s+Level:\s*\d+(?:\.\d+)?/\d+\)?', '', answer, flags=re.IGNORECASE)
-        answer = re.sub(r'\(?Score:\s*\d+(?:\.\d+)?%?\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\(?risk\s+score:\s*\d+(?:\.\d+)?(?:/100)?%?\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\(?triage\s+score:\s*\d+(?:\.\d+)?(?:/100)?%?\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\(?risk\s+level:\s*\d+(?:\.\d+)?(?:/100)?%?\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\(?score:\s*\d+(?:\.\d+)?(?:/100)?%?\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\b\d+(?:\.\d+)?/100\b', '', answer)
         
-        # Strip all bold markers (**) and list/italics asterisks (*) completely
-        answer = answer.replace("**", "").replace("*", "")
+        # Completely eliminate all bold/italic markdown stars (*, **) and underscores (_)
+        answer = answer.replace("**", "").replace("*", "").replace("_", "")
         
-        # Strip markdown header prefixes (e.g. ###, ##, #)
-        answer = re.sub(r'^#+\s*', '', answer, flags=re.MULTILINE)
+        # Completely eliminate all hashtags (#) from anywhere in the text
+        answer = answer.replace("#", "")
         
-        # Clean up trailing spaces or doubled-up spaces created by replacements
-        answer = answer.replace("  ", " ").replace(" .", ".")
+        # Clean up trailing spaces or doubled-up spaces/punctuation created by replacements
+        answer = answer.replace("  ", " ").replace(" .", ".").replace(" ,", ",").replace("()", "").replace("( )", "")
 
     return {
         "answer": answer.strip(),

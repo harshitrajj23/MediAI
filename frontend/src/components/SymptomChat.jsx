@@ -10,7 +10,8 @@ import {
   ChevronRight, 
   HeartHandshake,
   Activity,
-  Plus
+  Plus,
+  Square
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
@@ -36,6 +37,7 @@ export default function SymptomChat({
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const [activeRecognition, setActiveRecognition] = useState(null);
+  const [activeSpeakingIndex, setActiveSpeakingIndex] = useState(null);
 
 
   const messagesEndRef = useRef(null);
@@ -205,17 +207,17 @@ export default function SymptomChat({
       onTriageUpdate(mockTriage);
 
       // Add a simulated grounded text
-      const fallbackResponse = `**MediAI Clinical Assistant (Local Sandbox Emulation)**
+      const fallbackResponse = `MediAI Clinical Assistant (Local Sandbox Emulation)
 
-We have parsed your symptoms in **${language}**. Due to network sandbox mode, we evaluated your state using our local clinical rule weights.
+We have parsed your symptoms in ${language}. Due to network sandbox mode, we evaluated your state using our local clinical rule weights.
 
-**Triage Urgency Class:** **${mockTriage.urgency}** (Risk Level: ${mockTriage.score}/100)
+Triage Urgency Class: ${mockTriage.urgency}
 
-**Safety recommendations:**
+Safety recommendations:
 - ${mockTriage.explanation}
 ${mockTriage.actions.map(a => `- ${a}`).join('\n')}
 
-*Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This does not replace professional medical diagnosis.*`;
+Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This does not replace professional medical diagnosis.`;
 
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -231,50 +233,85 @@ ${mockTriage.actions.map(a => `- ${a}`).join('\n')}
 
   const [mediaRecorder, setMediaRecorder] = useState(null);
 
-  // Speak message out loud using browser TTS
-  const speakMessage = (content, lang) => {
+  const stopSpeaking = () => {
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setActiveSpeakingIndex(null);
+      addTelemetryLog('Voice Assistant', 'Speech synthesis stopped by user.', 'info');
+    }
+  };
+
+  // Speak message out loud using browser TTS with multilingual auto-detection & toggle
+  const speakMessage = (content, currentSelectedLang, index) => {
+    if ('speechSynthesis' in window) {
+      if (activeSpeakingIndex === index) {
+        stopSpeaking();
+        return;
+      }
+
       window.speechSynthesis.cancel(); // Stop any active speech
-      const cleanText = content.replace(/[*#`]/g, ''); // Remove markdown indicators
+
+      // Clean markdown tags out of the text
+      const cleanText = content.replace(/[*#`]/g, '');
+
+      // Detect language based on script/characters to support mixed languages perfectly
+      let detectedLang = 'English';
+      if (/[\u0900-\u097F]/.test(cleanText)) {
+        detectedLang = currentSelectedLang === 'Marathi' ? 'Marathi' : 'Hindi';
+      } else if (/[\u0B80-\u0BFF]/.test(cleanText)) {
+        detectedLang = 'Tamil';
+      } else if (/[\u0C00-\u0C7F]/.test(cleanText)) {
+        detectedLang = 'Telugu';
+      } else if (/[\u0C80-\u0CFF]/.test(cleanText)) {
+        detectedLang = 'Kannada';
+      } else if (/[\u0980-\u09FF]/.test(cleanText)) {
+        detectedLang = 'Bengali';
+      }
+
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      
+      setActiveSpeakingIndex(index);
+
       // Asynchronously fetch available system voices
       const voices = window.speechSynthesis.getVoices();
       let selectedVoice = null;
-      
-      if (lang === 'Hindi') {
-        utterance.lang = 'hi-IN';
-        selectedVoice = voices.find(v => v.lang.includes('hi') || v.lang.includes('hi-IN'));
-      } else if (lang === 'Tamil') {
-        utterance.lang = 'ta-IN';
-        selectedVoice = voices.find(v => v.lang.includes('ta') || v.lang.includes('ta-IN'));
-      } else if (lang === 'Telugu') {
-        utterance.lang = 'te-IN';
-        selectedVoice = voices.find(v => v.lang.includes('te') || v.lang.includes('te-IN'));
-      } else if (lang === 'Bengali') {
-        utterance.lang = 'bn-IN';
-        selectedVoice = voices.find(v => v.lang.includes('bn') || v.lang.includes('bn-IN'));
-      } else if (lang === 'Marathi') {
-        utterance.lang = 'mr-IN';
-        selectedVoice = voices.find(v => v.lang.includes('mr') || v.lang.includes('mr-IN'));
-      } else if (lang === 'Kannada') {
-        utterance.lang = 'kn-IN';
-        selectedVoice = voices.find(v => v.lang.includes('kn') || v.lang.includes('kn-IN'));
-      } else {
-        utterance.lang = 'en-US';
-        selectedVoice = voices.find(v => v.lang.includes('en') || v.lang.includes('en-US'));
-      }
-      
+
+      const getTargetLangCode = (langName) => {
+        switch (langName) {
+          case 'Hindi': return 'hi';
+          case 'Tamil': return 'ta';
+          case 'Telugu': return 'te';
+          case 'Bengali': return 'bn';
+          case 'Marathi': return 'mr';
+          case 'Kannada': return 'kn';
+          default: return 'en';
+        }
+      };
+
+      const langCode = getTargetLangCode(detectedLang);
+      utterance.lang = langCode === 'en' ? 'en-US' : `${langCode}-IN`;
+
+      selectedVoice = voices.find(v => {
+        const vl = v.lang.toLowerCase().replace('_', '-');
+        return vl.startsWith(langCode) || vl.includes(langCode);
+      });
+
       if (selectedVoice) {
         utterance.voice = selectedVoice;
       }
-      
+
       // Elderly mode reads slower for optimal clarity
       utterance.rate = elderlyMode ? 0.82 : 0.98;
       utterance.pitch = 1.0;
 
+      utterance.onend = () => {
+        setActiveSpeakingIndex(null);
+      };
+      utterance.onerror = () => {
+        setActiveSpeakingIndex(null);
+      };
+
       window.speechSynthesis.speak(utterance);
-      addTelemetryLog('Voice Assistant', `Reading clinical guidelines in ${lang} (${utterance.lang})`, 'success');
+      addTelemetryLog('Voice Assistant', `Reading clinical guidelines in ${detectedLang} (${utterance.lang})`, 'success');
     } else {
       alert("Text to Speech is not supported in this browser.");
     }
@@ -445,7 +482,7 @@ ${mockTriage.actions.map(a => `- ${a}`).join('\n')}
                   <div className="space-y-3">
                     {/* Triage Banner inside message if present */}
                     {msg.triage && (
-                      <div className={`p-3 border rounded-xl flex items-center justify-between ${
+                      <div className={`p-3 border rounded-xl flex items-center ${
                         msg.triage.urgency === 'Emergency' ? 'bg-red-950/40 border-red-700/60' :
                         msg.triage.urgency === 'Visit Clinic Soon' ? 'bg-yellow-950/30 border-yellow-700/40' :
                         'bg-emerald-950/20 border-emerald-700/40'
@@ -461,13 +498,6 @@ ${mockTriage.actions.map(a => `- ${a}`).join('\n')}
                             {msg.triage.urgency}
                           </span>
                         </div>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                          msg.triage.urgency === 'Emergency' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                          msg.triage.urgency === 'Visit Clinic Soon' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                          'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        }`}>
-                          Score: {msg.triage.score}%
-                        </span>
                       </div>
                     )}
                     <div className="whitespace-pre-line text-slate-300">
@@ -483,11 +513,23 @@ ${mockTriage.actions.map(a => `- ${a}`).join('\n')}
               {msg.role === 'assistant' && (
                 <div className="flex gap-2 mt-1">
                   <button 
-                    onClick={() => speakMessage(msg.content, language)}
-                    className="p-1 text-slate-500 hover:text-neon-green rounded transition-all flex items-center gap-1 text-[10px]"
-                    title="Listen aloud (TTS)"
+                    onClick={() => speakMessage(msg.content, language, i)}
+                    className={`p-1 rounded transition-all flex items-center gap-1 text-[10px] ${
+                      activeSpeakingIndex === i 
+                        ? 'text-red-400 hover:text-red-300 font-semibold' 
+                        : 'text-slate-500 hover:text-neon-green'
+                    }`}
+                    title={activeSpeakingIndex === i ? "Stop reading" : "Listen aloud (TTS)"}
                   >
-                    <Volume2 className="w-3.5 h-3.5" /> Read Aloud
+                    {activeSpeakingIndex === i ? (
+                      <>
+                        <Square className="w-3.5 h-3.5 fill-red-400" /> Stop Reading
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-3.5 h-3.5" /> Read Aloud
+                      </>
+                    )}
                   </button>
                 </div>
               )}

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 # Try importing chromadb for actual vector database capability
 try:
-    import chromadb
+    import chromadb  # type: ignore
     CHROMA_AVAILABLE = True
 except ImportError:
     CHROMA_AVAILABLE = False
@@ -603,7 +603,7 @@ You must provide helpful, empathetic primary health guidelines.
 CRITICAL: Do not diagnose the patient directly. Instead, provide preliminary safety guidelines grounded in the retrieved clinical literature.
 
 USER QUERY: "{user_query}"
-TRIAGE LEVEL: {triage_result['urgency']} (Risk Score: {triage_result['score']}/100)
+TRIAGE LEVEL: {triage_result['urgency']}
 DETECTED SYMPTOMS: {', '.join([e['term'] for e in extracted_entities]) if extracted_entities else 'None parsed'}
 
 VERIFIED CLINICAL KNOWLEDGE (RAG GROUNDING):
@@ -612,12 +612,13 @@ VERIFIED CLINICAL KNOWLEDGE (RAG GROUNDING):
 RESPONSE INSTRUCTIONS:
 1. Ground your suggestions STRICTLY in the clinical guidelines above.
 2. Start by acknowledging the user's symptoms empathetically.
-3. State the Triage Urgency Level clearly and list the required steps.
-4. If it is an Emergency, make your safety warning prominent.
-5. Answer strictly in the requested language: {language}. 
+3. State the Triage Urgency Level clearly and list the required steps. Do NOT mention any numerical risk scores, triage scores, or percentages (such as "20/100", "score", or "risk level") in your response text.
+4. Avoid excessive markdown bolding, stars, or asterisks. Keep it clean, professional, and readable. Do not use double bolding or put heavy asterisks in list items.
+5. If it is an Emergency, make your safety warning prominent but keep it clean.
+6. Answer strictly in the requested language: {language}. 
    - If language is "Hindi", write the entire response in beautiful, natural Devanagari Hindi script.
    - If language is "Tamil", "Telugu", "Bengali", "Kannada", or "Marathi", write entirely in that language's script. Do not use English script for the body.
-6. Add the following medical disclaimer at the absolute end: "Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This does not replace professional medical diagnosis."
+7. Add the following medical disclaimer at the absolute end: "Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This does not replace professional medical diagnosis."
 """
 
     answer = ""
@@ -627,7 +628,7 @@ RESPONSE INSTRUCTIONS:
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "mistral-tiny",
+            "model": "mistral-large-latest",
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.2
         }
@@ -667,22 +668,39 @@ RESPONSE INSTRUCTIONS:
         
         parsed_symptoms = ', '.join([e['term'] for e in extracted_entities]) if extracted_entities else trans["general"]
         
-        answer = f"""**{trans['header']}**
+        answer = f"""{trans['header']}
 
-{trans['intro']}: **{parsed_symptoms}**.
+{trans['intro']}: {parsed_symptoms}.
 
-**{trans['triage_title']}:**
-* **{trans['urgency_label']}:** {translated_urgency}
-* **{trans['protocol_label']}:**
+{trans['triage_title']}:
+- {trans['urgency_label']}: {translated_urgency}
+- {trans['protocol_label']}:
 {action_text}
 
-**{trans['rec_label']}:**
+{trans['rec_label']}:
 {ref_txt}
 
-*{trans['disclaimer']}*"""
+{trans['disclaimer']}"""
+
+    # Robust Post-Processing to strictly guarantee NO STARS, NO BOLDING, and NO NUMERICAL RISK/TRIAGE SCORES
+    if answer:
+        # Remove numerical score references like "(Risk Score: 20.0/100)", "Risk Level: 20/100", "(Score: 20%)", etc.
+        answer = re.sub(r'\(?Risk\s+Score:\s*\d+(?:\.\d+)?/\d+\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\(?Triage\s+Score:\s*\d+(?:\.\d+)?/\d+\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\(?Risk\s+Level:\s*\d+(?:\.\d+)?/\d+\)?', '', answer, flags=re.IGNORECASE)
+        answer = re.sub(r'\(?Score:\s*\d+(?:\.\d+)?%?\)?', '', answer, flags=re.IGNORECASE)
+        
+        # Strip all bold markers (**) and list/italics asterisks (*) completely
+        answer = answer.replace("**", "").replace("*", "")
+        
+        # Strip markdown header prefixes (e.g. ###, ##, #)
+        answer = re.sub(r'^#+\s*', '', answer, flags=re.MULTILINE)
+        
+        # Clean up trailing spaces or doubled-up spaces created by replacements
+        answer = answer.replace("  ", " ").replace(" .", ".")
 
     return {
-        "answer": answer,
+        "answer": answer.strip(),
         "retrieved_chunks": [{
             "source": r["doc"]["source"],
             "topic": r["doc"]["topic"],

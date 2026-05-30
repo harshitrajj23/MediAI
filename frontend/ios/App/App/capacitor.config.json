@@ -1,0 +1,6 @@
+{
+	"appId": "com.mediai.app",
+	"appName": "MediAI",
+	"webDir": "dist",
+	"packageClassList": []
+}

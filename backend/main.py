@@ -240,57 +240,68 @@ def send_telegram_reminder(req: TelegramReminderRequest):
 # -----------------
 def fetch_real_places_near_user(lat: float, lon: float, query_name_filter: str) -> list:
     """
-    Queries OpenStreetMap's Overpass API to fetch real clinics, hospitals, and doctors
-    matching specific specialty name filters within a 10km radius of the user's coordinates.
+    Queries the Geoapify Places API to fetch hyper-local clinics and hospitals.
+    Falls back to empty list if it fails or API key is missing.
     """
-    radius = 10000  # 10 km search radius
-    overpass_query = f"""
-    [out:json][timeout:8];
-    (
-      node["amenity"="doctors"]{query_name_filter}(around:{radius},{lat},{lon});
-      node["amenity"="clinic"]{query_name_filter}(around:{radius},{lat},{lon});
-      node["amenity"="hospital"]{query_name_filter}(around:{radius},{lat},{lon});
-    );
-    out tags center;
-    """
-    overpass_url = "https://overpass-api.de/api/interpreter"
+    api_key = os.getenv("GEOAPIFY_API_KEY")
+    if not api_key:
+        print("[GEOAPIFY] Missing GEOAPIFY_API_KEY in .env")
+        return []
+        
+    radius = 8000  # 8km search radius
+    categories = "healthcare.hospital,healthcare.clinic_or_praxis"
+    url = f"https://api.geoapify.com/v2/places?categories={categories}&filter=circle:{lon},{lat},{radius}&limit=30&apiKey={api_key}"
+    
     try:
         import requests
         import re
-        res = requests.post(overpass_url, data={"data": overpass_query}, timeout=5)
+        res = requests.get(url, timeout=5)
         if res.status_code == 200:
-            elements = res.json().get("elements", [])
+            features = res.json().get("features", [])
             valid_elements = []
-            for el in elements:
-                tags = el.get("tags", {})
-                raw_name = tags.get("name") or tags.get("name:en") or tags.get("operator")
+            
+            # Extract keywords from the overpass query filter for local filtering
+            # Example filter: '["name"~"eye|nethra|netra|ophthal|vision|optic",i]'
+            keywords = []
+            match = re.search(r'"([^"]+)",i', query_name_filter)
+            if match:
+                keywords = match.group(1).split('|')
+                
+            for f in features:
+                props = f.get("properties", {})
+                raw_name = props.get("name")
                 if raw_name:
+                    # Filter locally to match the requested specialty
+                    name_lower = raw_name.lower()
+                    if keywords and "clinic|doctor|health|medical|care" not in query_name_filter:
+                        if not any(k in name_lower for k in keywords):
+                            continue
+                            
                     doc_name = ""
                     clinic_name = raw_name
                     
                     # If it already contains "Dr.", extract it!
-                    match = re.search(r'(Dr\.?\s+[A-Za-z\s]+)', raw_name)
-                    if match:
-                        doc_name = match.group(1).strip()
+                    dr_match = re.search(r'(Dr\.?\s+[A-Za-z\s]+)', raw_name)
+                    if dr_match:
+                        doc_name = dr_match.group(1).strip()
                     else:
                         # Extract first word to create a realistic doctor name dynamically
                         first_words = raw_name.split()
                         base_name = first_words[0] if first_words else "Clinic"
-                        doc_name = f"Dr. {base_name} Specialist"
+                        doc_name = f"Dr. {base_name}"
                         
-                    el_lat = el.get("lat") or el.get("center", {}).get("lat")
-                    el_lon = el.get("lon") or el.get("center", {}).get("lon")
-                    if el_lat and el_lon:
-                        valid_elements.append({
-                            "doc_name": doc_name,
-                            "clinic_name": clinic_name,
-                            "lat": el_lat,
-                            "lon": el_lon,
-                            "type": tags.get("amenity", "clinic")
-                        })
+                    valid_elements.append({
+                        "doc_name": doc_name,
+                        "clinic_name": clinic_name,
+                        "lat": props.get("lat"),
+                        "lon": props.get("lon"),
+                        "type": "clinic"
+                    })
             return valid_elements
+        else:
+            print(f"[GEOAPIFY] API returned status code {res.status_code}")
     except Exception as e:
-        print(f"[OVERPASS API WARNING] Failed to query OSM Overpass: {e}")
+        print(f"[GEOAPIFY API WARNING] Failed to query Geoapify: {e}")
     return []
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

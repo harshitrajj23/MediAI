@@ -54,6 +54,7 @@ export default function App() {
         setUserProfile(null);
         setMedications([]);
         setConsultations([]);
+        setTriageData(null);
       }
     });
 
@@ -154,6 +155,7 @@ export default function App() {
     setUserProfile(null);
     setMedications([]);
     setConsultations([]);
+    setTriageData(null);
     setShowLanding(true);
   };
 
@@ -225,9 +227,7 @@ export default function App() {
                 </button>
               ) : (
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-neon-green flex items-center justify-center shadow-[0_0_12px_rgba(34,197,94,0.3)]">
-                    <Activity className="w-3.5 h-3.5 text-dark-950" />
-                  </div>
+                  <img src="/logo.png" alt="MediAI Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_12px_rgba(34,197,94,0.3)]" />
                   <span className="font-bold text-base tracking-tight text-white hover:text-neon-green transition-colors cursor-pointer">MediAI</span>
                 </div>
               )}

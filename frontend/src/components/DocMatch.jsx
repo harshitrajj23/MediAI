@@ -98,6 +98,12 @@ export default function DocMatch({
     const urgency = triageData?.urgency || clinicalProfile.urgency || "Home Care Recommended";
     const symptoms = clinicalProfile.queryText || "";
     
+    if (!symptoms) {
+      setDoctors([]);
+      setLoading(false);
+      return;
+    }
+    
     let url = `http://127.0.0.1:8000/api/doctors?triage_urgency=${encodeURIComponent(urgency)}`;
     
     if (symptoms) {
@@ -395,7 +401,12 @@ export default function DocMatch({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {doctors.map((doc, idx) => (
+                  {doctors.length === 0 ? (
+                    <div className="text-slate-500 text-xs text-center py-6 bg-dark-950/40 rounded-xl border border-dark-800 border-dashed">
+                      No symptoms reported yet. Please report your symptoms to get doctor recommendations.
+                    </div>
+                  ) : (
+                    doctors.map((doc, idx) => (
                     <div 
                       key={doc.id}
                       className={`p-4 bg-dark-950/60 border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-neon-green/30 ${
@@ -452,7 +463,8 @@ export default function DocMatch({
                         {selectedDoc?.id === doc.id ? 'Selected' : 'Select Doctor'}
                       </button>
                     </div>
-                  ))}
+                  ))
+                  )}
                 </div>
               )}
             </div>

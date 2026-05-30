@@ -161,40 +161,6 @@ export default function Auth({ onAuthSuccess }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // AI Architecture Console Preview typing state
-  const [activeAgentTab, setActiveAgentTab] = useState('coordinator');
-  const [agentText, setAgentText] = useState('');
-  const agentTypingTimerRef = useRef(null);
-
-  const agentSpecifications = {
-    coordinator: "MediAI Orchestrator core coordinates BioClinicalBERT NER tokens, PubmedBERT triage weights, BGE semantic retrievers, and Mistral LLM zero-hallucination pipelines simultaneously in less than 700ms.",
-    nlp: "BioClinicalBERT Clinical NER matches patient dialogues, maps multilingual input variations, and extracts exact semantic symptom descriptors securely locally.",
-    triage: "PubMedBERT Triage Classifier calculates absolute medical urgency vector tiers (Emergency, Visit Clinic, Home Care) based on NIH/WHO guideline matrices.",
-    rag: "BGE-Large Vector Embeddings run instant cosine similarity matching on 14,200 CDC/WHO peer-reviewed healthcare guidance chunks to ground response boundaries."
-  };
-
-  useEffect(() => {
-    // Typing simulation for AI Agent panel
-    const fullText = agentSpecifications[activeAgentTab];
-    let currentIndex = 0;
-    setAgentText('');
-
-    if (agentTypingTimerRef.current) clearInterval(agentTypingTimerRef.current);
-
-    agentTypingTimerRef.current = setInterval(() => {
-      if (currentIndex < fullText.length) {
-        setAgentText((prev) => prev + fullText.charAt(currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(agentTypingTimerRef.current);
-      }
-    }, 12);
-
-    return () => {
-      if (agentTypingTimerRef.current) clearInterval(agentTypingTimerRef.current);
-    };
-  }, [activeAgentTab]);
-
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -260,7 +226,7 @@ export default function Auth({ onAuthSuccess }) {
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.message || "Authentication decryption transaction failed.");
+      setErrorMsg(err.message || "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -287,120 +253,18 @@ export default function Auth({ onAuthSuccess }) {
           </div>
           <div>
             <span className="font-extrabold text-white tracking-wider glow-text-green text-xl">MediAI</span>
-            <span className="text-[9px] font-bold text-neon-mint block uppercase tracking-widest mt-0.5">Clinical Enclave Core</span>
           </div>
         </div>
 
         {/* Hero Copywriting */}
         <div className="my-12 lg:my-0 space-y-6 max-w-2xl">
-          
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-neon-green/10 border border-neon-green/30 text-neon-green rounded-full text-[10px] font-bold uppercase tracking-wider animate-pulse">
-            <Sparkles className="w-3 h-3 text-neon-green" /> Auscultating Healthcare Accessibility
-          </div>
-
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight glow-text-white">
-            Clinical Grounded <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green via-emerald-400 to-neon-mint">Multi-Agent Intelligence</span>
+            Your Personal <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green via-emerald-400 to-neon-mint">Health Assistant</span>
           </h1>
 
           <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-            Engineered specifically for **underserved communities**. By embedding high-fidelity local BioClinicalBERT NLP, CDC/WHO guideline RAG pipelines, and Whisper-guided edge speech models, MediAI secures premium zero-hallucination triage access across 15+ regional dialects.
+            Get instant health insights, track your medications, and consult with doctors anytime, anywhere.
           </p>
-
-          {/* Glowing Hologram-Style Cards with Live ECG Animations */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6">
-            
-            {/* Hologram Card 1 */}
-            <div className="bg-dark-900/40 border border-dark-800 rounded-2xl p-4 flex flex-col justify-between min-h-[120px] backdrop-blur-md relative group hover:border-neon-green/40 transition-all duration-300">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Triage Accuracy</span>
-              <div className="my-2 h-6 flex items-center">
-                {/* SVG Beating ECG Line Animation */}
-                <svg className="w-full h-full stroke-neon-green fill-none" viewBox="0 0 100 30">
-                  <path 
-                    d="M0,15 L20,15 L25,5 L30,25 L35,15 L50,15 L55,0 L60,30 L65,15 L80,15 L85,15 L90,15 L100,15" 
-                    strokeWidth="1.5"
-                    strokeDasharray="200"
-                    strokeDashoffset="200"
-                    className="animate-[draw-ecg_3.2s_infinite_linear]"
-                  />
-                </svg>
-              </div>
-              <span className="text-lg font-extrabold text-white tracking-tight glow-text-green">98.4% Rate</span>
-            </div>
-
-            {/* Hologram Card 2 */}
-            <div className="bg-dark-900/40 border border-dark-800 rounded-2xl p-4 flex flex-col justify-between min-h-[120px] backdrop-blur-md relative group hover:border-neon-green/40 transition-all duration-300">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Whisper Speech</span>
-              <div className="my-2 flex gap-1 items-end justify-center h-6">
-                {/* pulsing voice waveform frequency bar elements */}
-                {[...Array(9)].map((_, i) => (
-                  <span 
-                    key={i} 
-                    className="w-1 bg-neon-green rounded-full animate-pulse-waveform"
-                    style={{ 
-                      height: `${[35, 75, 45, 90, 60, 85, 30, 70, 40][i]}%`,
-                      animationDelay: `${i * 120}ms` 
-                    }} 
-                  />
-                ))}
-              </div>
-              <span className="text-lg font-extrabold text-white tracking-tight">15+ Dialects</span>
-            </div>
-
-            {/* Hologram Card 3 */}
-            <div className="bg-dark-900/40 border border-dark-800 rounded-2xl p-4 flex flex-col justify-between min-h-[120px] backdrop-blur-md relative group hover:border-neon-green/40 transition-all duration-300">
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Security Grounding</span>
-              <div className="my-2 flex justify-center items-center h-6">
-                <ShieldCheck className="w-6 h-6 text-neon-green animate-pulse" />
-              </div>
-              <span className="text-lg font-extrabold text-white tracking-tight">0% Hallucinations</span>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* AI Multi-Agent Interactive Architecture Preview Console */}
-        <div className="bg-dark-950/70 border border-dark-800 rounded-2xl p-5 backdrop-blur-md max-w-2xl">
-          <div className="flex items-center justify-between border-b border-dark-800 pb-3 mb-4">
-            <span className="text-[10px] text-slate-400 font-mono font-bold uppercase tracking-widest flex items-center gap-1.5">
-              <Terminal className="w-3.5 h-3.5 text-neon-green" /> Multi-Agent AI Core Preview
-            </span>
-            <div className="flex gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="w-2 h-2 rounded-full bg-yellow-500" />
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {[
-              { id: 'coordinator', label: 'Orchestrator' },
-              { id: 'nlp', label: 'Clinical NLP' },
-              { id: 'triage', label: 'PubMed Triage' },
-              { id: 'rag', label: 'BGE Vector RAG' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveAgentTab(tab.id)}
-                className={`py-1.5 px-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border transition-all truncate ${
-                  activeAgentTab === tab.id 
-                    ? 'bg-neon-green/10 border-neon-green/40 text-neon-green' 
-                    : 'bg-dark-900 border-dark-800 text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* AI Typing Intelligence Output box */}
-          <div className="bg-dark-950 p-4 border border-dark-800/80 rounded-xl min-h-[70px] flex items-start">
-            <p className="font-mono text-[10px] text-slate-300 leading-normal">
-              <span className="text-neon-green font-bold">&gt;&gt; </span>
-              {agentText}
-              <span className="w-1.5 h-3 bg-neon-green inline-block animate-pulse ml-1" />
-            </p>
-          </div>
         </div>
 
       </div>
@@ -412,9 +276,9 @@ export default function Auth({ onAuthSuccess }) {
         <div className="glass-panel p-8 border border-dark-700/60 shadow-neon-green-lg relative z-20">
           
           <div className="flex flex-col items-center text-center space-y-3 mb-6">
-            <h2 className="font-extrabold text-xl text-white tracking-wider glow-text-green">Secure Access Gateway</h2>
-            <span className="text-[9px] font-bold text-neon-mint uppercase tracking-widest block leading-none">
-              Decrypting Credentials Enclave
+            <h2 className="font-extrabold text-xl text-white tracking-wider glow-text-green">Welcome to MediAI</h2>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block leading-none">
+              Sign in to your account
             </span>
           </div>
 
@@ -426,7 +290,7 @@ export default function Auth({ onAuthSuccess }) {
                 !isSignUp ? 'bg-neon-green text-dark-950 shadow-md font-extrabold' : 'text-slate-500 hover:text-slate-200'
               }`}
             >
-              Access Portal
+              Sign In
             </button>
             <button 
               onClick={() => { setIsSignUp(true); setErrorMsg(''); setSuccessMsg(''); }}
@@ -434,7 +298,7 @@ export default function Auth({ onAuthSuccess }) {
                 isSignUp ? 'bg-neon-green text-dark-950 shadow-md font-extrabold' : 'text-slate-500 hover:text-slate-200'
               }`}
             >
-              Enroll Profile
+              Create Account
             </button>
           </div>
 
@@ -488,7 +352,7 @@ export default function Auth({ onAuthSuccess }) {
             </div>
 
             <div className="flex flex-col space-y-1.5">
-              <label className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Cryptographic Password</label>
+              <label className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Password</label>
               <div className="relative flex items-center">
                 <Lock className="absolute left-4 w-4 h-4 text-slate-500" />
                 <input 
@@ -507,14 +371,10 @@ export default function Auth({ onAuthSuccess }) {
               disabled={loading}
               className="btn-primary w-full py-3 bg-neon-green hover:bg-neon-bright text-xs tracking-wider uppercase font-extrabold flex items-center justify-center gap-2 mt-6 border-none shadow-neon-green"
             >
-              {loading ? "Decrypting secure enclave..." : isSignUp ? "Enroll Profile" : "Access Clinic Enclave"} 
+              {loading ? "Please wait..." : isSignUp ? "Create Account" : "Sign In"} 
               <ArrowRight className="w-4 h-4 text-dark-950" />
             </button>
           </form>
-
-          <p className="text-[9px] text-slate-500 text-center mt-6">
-            *Built for underserved accessibility. Toggle confirm email settings inside the Supabase control panel for instantaneous demo deployment.
-          </p>
 
         </div>
 

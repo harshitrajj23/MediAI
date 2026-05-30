@@ -43,9 +43,7 @@ export default function LandingPage({ onEnterApp }) {
         {/* Minimal nav */}
         <nav className="flex items-center justify-between px-8 md:px-16 py-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-neon-green flex items-center justify-center">
-              <Activity className="w-4 h-4 text-dark-950" />
-            </div>
+            <img src="/logo.png" alt="MediAI Logo" className="w-8 h-8 object-contain" />
             <span className="text-lg font-bold tracking-tight">MediAI</span>
           </div>
           <button

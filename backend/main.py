@@ -112,6 +112,24 @@ async def analyze_symptoms(req: SymptomRequest):
     # Phase 1: BioClinicalBERT Clinical Entity Extraction
     entities = extract_symptoms_bioclinical(req.symptom_text)
     
+    # Non-Medical Query Guardrail
+    text_lower = req.symptom_text.lower()
+    medical_keywords = ["pain", "ache", "fever", "cough", "breath", "sick", "ill", "nausea", "dizzy", "blood", "wound", "doctor", "hospital", "medicine", "pill", "hurt", "swelling", "redness", "itch", "rash", "vomit", "diarrhea", "stomach", "head", "leg", "arm", "eye", "vision", "heart", "chest", "symptom", "disease", "cancer", "infection"]
+    is_medical = any(word in text_lower for word in medical_keywords) or len(entities) > 0
+    
+    if not is_medical:
+        return {
+            "entities": [],
+            "triage": {
+                "urgency": "Non-Medical Query",
+                "score": 0,
+                "explanation": "No medical symptoms detected.",
+                "actions": []
+            },
+            "ai_response": "I am a medical AI assistant. It looks like your query is not related to a medical symptom or health condition. Please describe your health concern for assistance.",
+            "retrieved_chunks": []
+        }
+        
     # Phase 2: PubMedBERT Triage Risk Evaluation
     triage = predict_triage_urgency(req.symptom_text, entities)
     

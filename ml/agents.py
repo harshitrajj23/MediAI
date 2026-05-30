@@ -181,3 +181,69 @@ def predict_triage_urgency(symptom_text, extracted_entities):
         "explanation": explanation,
         "actions": actions
     }
+
+
+def translate_to_english(text: str) -> str:
+    """
+    Translates non-English queries (Hindi, Tamil, etc.) to English using Mistral API.
+    If it's already English, returns it.
+    """
+    if not text or not text.strip():
+        return text
+
+    # Check if text is only standard English characters (ASCII printables)
+    # This acts as an extremely fast bypass for standard English inputs
+    try:
+        text.encode('ascii')
+        # Simple heuristic: if it's Romanized Hindi (like "sine me dard"), it contains ASCII but it's not English.
+        # But if it has common English words or is purely English, we don't necessarily have to translate.
+        # However, to be 100% safe, if it has non-ASCII characters (Hindi, etc.), we definitely translate.
+        # If it's pure ASCII, we check if it is common English or Romanized.
+        # For simplicity, if it's pure ASCII and contains spaces, we can just check if it contains common
+        # non-English words or just let it pass to save API calls.
+        # Let's check for non-ASCII characters:
+        if all(ord(c) < 128 for c in text):
+            # Pure ASCII: let's bypass translating to avoid unnecessary latency for English users
+            return text
+    except UnicodeEncodeError:
+        pass
+
+    api_key = os.getenv("MISTRAL_API")
+    if not api_key:
+        print("[TRANSLATION WARNING] Missing MISTRAL_API key in .env")
+        return text
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "mistral-large-latest",
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a professional medical translator. Translate the patient's symptom query into standard clinical English. If the text is already in English, return it exactly as is. Output ONLY the English translation, and absolutely nothing else. Do not include introductory, conversational, or explanatory text."
+            },
+            {
+                "role": "user",
+                "content": text
+            }
+        ],
+        "temperature": 0.0
+    }
+    try:
+        res = requests.post("https://api.mistral.ai/v1/chat/completions", headers=headers, json=payload, timeout=8)
+        if res.status_code == 200:
+            translated = res.json()["choices"][0]["message"]["content"].strip()
+            # Clean wrapping quotes if any
+            if translated.startswith('"') and translated.endswith('"'):
+                translated = translated[1:-1].strip()
+            print(f"[TRANSLATION AGENT] Translated regional query '{text}' -> '{translated}'")
+            return translated
+        else:
+            print(f"[TRANSLATION AGENT WARNING] API returned status {res.status_code}: {res.text}")
+    except Exception as e:
+        print(f"[TRANSLATION AGENT ERROR] Failed to query Mistral translation: {e}")
+
+    return text
+

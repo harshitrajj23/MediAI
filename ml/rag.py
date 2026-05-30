@@ -583,13 +583,14 @@ ACTION_TRANSLATIONS = {
 }
 
 
-def generate_grounded_response(user_query, triage_result, extracted_entities, language="English"):
+def generate_grounded_response(user_query, triage_result, extracted_entities, language="English", english_query=None):
     """
     Retrieves grounded medical knowledge from the Vector Database and generates
     an absolute hallucination-free response using Mistral API.
     """
     rag = LocalMedicalRAG()
-    retrieved = rag.query_medical_guidelines(user_query, top_k=2)
+    query_for_retrieval = english_query if english_query else user_query
+    retrieved = rag.query_medical_guidelines(query_for_retrieval, top_k=2)
     
     # Format retrieved knowledge
     knowledge_context = ""
@@ -602,7 +603,8 @@ def generate_grounded_response(user_query, triage_result, extracted_entities, la
 You must provide helpful, empathetic primary health guidelines.
 CRITICAL: Do not diagnose the patient directly. Instead, provide preliminary safety guidelines grounded in the retrieved clinical literature.
 
-USER QUERY: "{user_query}"
+USER QUERY (Original): "{user_query}"
+USER QUERY (English translation): "{english_query if english_query else user_query}"
 TRIAGE LEVEL: {triage_result['urgency']}
 DETECTED SYMPTOMS: {', '.join([e['term'] for e in extracted_entities]) if extracted_entities else 'None parsed'}
 

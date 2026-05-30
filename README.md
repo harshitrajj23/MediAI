@@ -1,43 +1,70 @@
-# MediAI — AI-Powered Healthcare Accessibility Platform 🩺✨
+# 🩺 MediAI — Next-Generation Healthcare Accessibility Platform
 
-**MediAI** is a state-of-the-art multi-agent AI healthcare platform designed to make primary clinical guidance, triage prioritization, medication adherence, and telemedicine escalations highly accessible, multilingual, and grounded for underserved communities.
-
-Built specifically to dominate global hackathons, **MediAI** incorporates a premium **Green-and-Black Gradient Cyber-Medical UI**, a visual multi-agent telemetry logging console, real-time image scan processing (using CLIP/local pixel-level analysis for wound/rash scans), Whisper speech recognition integrations, and a screen-reader-ready **"Elderly & Accessibility Mode."**
-
----
-
-## 🌟 Core Technical Highlights (Why This Project Wins)
-
-1. **Grounded Medical Retrieval (RAG)**: Integrates `BAAI/bge-large-en-v1.5` embeddings with a high-performance local vector database indexed with verified clinical guideline chunks from the **World Health Organization (WHO)**, **CDC**, and **NIH**, completely eliminating LLM hallucinations.
-2. **Clinical NLP Agent Ensemble**:
-   - **Symptom Intelligence**: Utilizes `emilyalsentzer/BioClinicalBERT` for precise clinical token extraction.
-   - **Triage Prediction**: Uses `microsoft/BiomedNLP-BiomedBERT` (PubMedBERT) to predict urgency scoring across three severity categories (🔴 Emergency, 🟡 Visit Clinic Soon, 🟢 Home Care).
-3. **Multimodal Medical Vision Lab**: Features an interactive drag-and-drop wound, rash, and eye scanner that scans local pixel arrays for redness and purulence density indicators, cross-referenced with CLIP features to output severity scores.
-4. **Whisper Speech Recognition & XTTS Voice response**: Integrates speech-to-text models for hands-free clinical inputs, paired with native browser speech synthesis in multiple regional languages (English, Hindi, Tamil, Telugu, Bengali, Marathi) to accommodate elderly and low-literacy patients.
-5. **Twilio SMS Adherence Logs Console**: Simulates Twilio alerts dispatched instantly when medications are scheduled.
-6. **Dermatology & Cardiology Routing**: Dynamic scheduling scheduler matching triage urgency to clinical practitioners, opening encrypted Zoom/video consultation feeds in real-time.
+<div align="center">
+  <p><strong>An advanced, multi-agent AI telemedicine and triaging platform designed for global accessibility, precise clinical guidance, and emergency response.</strong></p>
+</div>
 
 ---
 
-## 📂 Folder Structure
+## 🌟 Overview
+
+**MediAI** bridges the gap in primary healthcare access by providing a highly robust, multilingual, and AI-driven platform. It empowers underserved communities with clinical guidance, triage prioritization, medication adherence tracking, and seamless telemedicine escalations. 
+
+Built with scalability and cross-platform readiness in mind (Web, iOS, and Android via Capacitor), MediAI integrates state-of-the-art NLP, multimodal vision, real-time geolocation routing, and secure instant messaging alerts to deliver a complete patient journey from symptom to specialist.
+
+---
+
+## 🚀 Core Features & Technical Innovations
+
+### 1. 🧠 Multi-Agent Clinical NLP & Triage
+- **Grounded Medical Retrieval (RAG)**: Integrates `BAAI/bge-large-en-v1.5` embeddings with a local vector database indexed with clinical guidelines from the **WHO, CDC, and NIH** to eliminate LLM hallucinations.
+- **Symptom Intelligence**: Utilizes `emilyalsentzer/BioClinicalBERT` for precise clinical token extraction.
+- **Triage Severity Prediction**: Employs `microsoft/BiomedNLP-BiomedBERT` to predict urgency scoring (🔴 Emergency, 🟡 Visit Clinic Soon, 🟢 Home Care).
+
+### 2. 🚑 Emergency SOS & Location-Based Dispatch
+- **Intelligent Hospital Routing**: Integrates the **Geoapify API** to locate the nearest hospitals within a dynamic radius and calculate accurate ETA based on patient coordinates.
+- **Real-Time Telegram Alerts**: Features automated secure Telegram dispatcher alerts for instant emergency notifications and medication reminders.
+- **Deterministic Doctor Matching**: Dynamically routes patients to realistically matched practitioners based on clinical severity and geolocation.
+
+### 3. 👁️ Multimodal Medical Vision Lab
+- **Dermatological & Wound Scanning**: Interactive drag-and-drop vision scanner for wounds and rashes. Uses pixel-level arrays and CLIP features to analyze redness/purulence density and output severity scores.
+
+### 4. 🌍 Accessibility & Multilingual Support
+- **Elderly & Accessibility Mode**: A screen-reader-ready interface with dynamic layout scaling.
+- **Multilingual Query & Voice Integration**: Supports inputs in multiple regional languages (English, Hindi, Tamil, Telugu, Bengali, Marathi). Integrates Whisper speech recognition and native browser speech synthesis for hands-free and low-literacy usage.
+
+### 5. 📱 Cross-Platform Ready (Capacitor)
+- Native mobile deployment support via **Capacitor**, enabling seamless builds for iOS and Android platforms from a single web codebase.
+
+---
+
+## 🏗️ Architecture & Tech Stack
+
+- **Frontend**: React.js, Vite, Tailwind CSS, Lucide Icons, Capacitor (Mobile)
+- **Backend**: Python, FastAPI, Uvicorn
+- **AI/ML Layer**: Hugging Face Serverless Inference, Mistral LLM, CLIP, Whisper, BioClinicalBERT
+- **Integrations**: Geoapify (Location & Mapping), Telegram Bot API (Alerts & Dispatch)
+
+---
+
+## 📂 Repository Structure
 
 ```text
 MediAI/
-├── .env                  # Configuration keys (Mistral API, HF API Token, Supabase)
+├── .env                  # Configuration keys (Mistral API, HF API Token, Telegram)
 ├── README.md             # Project documentation
-├── frontend/             # Single-Page Vite + React + Tailwind + Lucide UI
+├── frontend/             # Single-Page Vite + React Application
 │   ├── src/
-│   │   ├── components/   # Modular tabs (Dashboard, SymptomChat, VisionLab, MedTracker, DocMatch)
-│   │   ├── App.jsx       # State coordinator & navigation drawer
-│   │   ├── index.css     # Glowing glassmorphic styles & scrolling bars
-│   │   └── main.jsx
-│   ├── package.json
-│   └── tailwind.config.js
-├── backend/              # FastAPI Server (API routing & state database)
-│   ├── main.py           # Core endpoints for symptoms, triage, vision, and CRUD meds
+│   │   ├── components/   # Modular UI components (Dashboard, SymptomChat, VisionLab)
+│   │   ├── App.jsx       # State coordinator & routing
+│   │   └── index.css     # Premium glassmorphic styling system
+│   ├── capacitor.config.ts # Mobile app build configuration
+│   └── package.json
+├── backend/              # FastAPI Server
+│   ├── main.py           # Core endpoints (symptoms, triage, vision, CRUD meds, SOS)
 │   ├── requirements.txt
-│   └── medications_store.json  # Local JSON database persistent backup
-└── ml/                   # Machine Learning Layer (Clinical Inference models)
+│   └── medications_store.json # Local JSON database for persistent records
+└── ml/                   # Machine Learning Layer (Clinical Inference)
     ├── agents.py         # BioClinicalBERT & PubMedBERT classifiers
     ├── rag.py            # BGE-Large Embeddings & custom cosine vector match
     ├── vision.py         # CLIP Wound & Rash color analysis
@@ -46,45 +73,57 @@ MediAI/
 
 ---
 
-## ⚙️ Quick Start Installation & Execution
+## ⚙️ Quick Start & Installation
 
-### Prerequisite Environment Variables (`.env`)
-Make sure your root `.env` file contains the following configurations:
+### 1. Environment Configuration (`.env`)
+Create a `.env` file in the root directory and add the following keys:
 ```bash
-# Core Mistral LLM (Already present)
+# LLM Provider
 MISTRAL_API=your_mistral_key_here
 
-# Hugging Face Serverless API Token (Highly recommended - Free to get!)
-# Create a free token at https://huggingface.co/settings/tokens to activate live BioClinicalBERT/Whisper/CLIP calls
+# Hugging Face Serverless API Token (Required for BioClinicalBERT/Whisper/CLIP calls)
 HF_API_TOKEN=your_hugging_face_token_here
+
+# Telegram Bot Alerts (Optional - for medication reminders and SOS dispatch)
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+TELEGRAM_CHAT_ID=your_telegram_chat_id_here
+
+# Geoapify (Location Routing)
+GEOAPIFY_API_KEY=your_geoapify_key_here
 ```
 
-### Step 1: Launch FastAPI Server
+### 2. Launch FastAPI Backend
 Open a terminal window and run:
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
-*The API will boot and be accessible at `http://127.0.0.1:8000` with documentation interactive playground running at `http://127.0.0.1:8000/docs`.*
+*The API runs at `http://127.0.0.1:8000`. Interactive documentation is available at `/docs`.*
 
-### Step 2: Launch Vite React Application
+### 3. Launch Vite React Frontend
 Open a second terminal window and run:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-*The web page will compile instantly and run locally at `http://localhost:5173`.*
+*The application runs locally at `http://localhost:5173`.*
 
 ---
 
-## 🩺 Patient Journey Demo Walkthrough
+## 🩺 Patient Journey Demonstration
 
-1. **Accessibility Selection**: Toggle **"Elderly Mode"** in the top right. Hear the screen reader read out: *"Elderly accessibility mode active. Layout sizes adjusted."* Notice all buttons scale up dynamically.
-2. **AI Symptom Chat**: Click "AI Symptom Chat" in the navigation drawer. Click the mic button to speak, or input: *"I have a sudden sharp burning pain in my chest that spreads to my left arm, and I feel very dizzy."*
-3. **Agent Telemetry Logs**: Watch the left telemetry console execute real-time parsing: `[BioClinicalBERT]` extracts symptoms, `[PubMedBERT]` scores critical severity, `[BGE Large]` queries the vector store, and `[Mistral]` returns a grounded cardioprotective protocol in milliseconds. Triage is flagged as 🔴 **Emergency**.
-4. **Adherence scheduling**: Go to **"Pill Reminders"** and schedule **Aspirin (300mg)**. Watch the **Safety Matrix** execute a live drug audit warning and log simulated Twilio dispatch reminders in real-time.
-5. **Specialist Escalation**: Navigate to **"Telemedicine"** and click **"Start Consultation Feed"** with Cardiologist Dr. Sarah Mitchell. Instantly launch the secure full-screen HD virtual video consultation!
+1. **Accessibility Selection**: Toggle **"Elderly Mode"** to scale up UI elements and activate auditory screen-reader guidance.
+2. **AI Symptom Chat**: Use voice input to describe symptoms in native languages. Watch the telemetry console parse data through `[BioClinicalBERT]` for tokens and `[PubMedBERT]` for urgency scoring.
+3. **Medication Management**: Schedule prescriptions and receive real-time adherence alerts via the Telegram Bot API.
+4. **Emergency Escalation (SOS)**: Trigger an SOS to calculate the nearest medical facility via **Geoapify** and dispatch a real-time notification block with patient coordinates to the Telegram emergency channel.
+5. **Telemedicine Consultations**: Connect directly to specialized practitioners via secure consultation feeds based on triage routing.
+
+---
+
+<div align="center">
+  <p><i>Empowering global healthcare through autonomous clinical intelligence.</i></p>
+</div>

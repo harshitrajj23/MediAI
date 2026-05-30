@@ -108,7 +108,7 @@ export default function LandingPage({ onEnterApp }) {
               </div>
               <div>
                 <h3 className="font-semibold text-sm mb-1">Instant triage</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">98% accuracy on clinical symptom analysis with BioClinicalBERT.</p>
+                <p className="text-xs text-slate-400 leading-relaxed">High-accuracy guidance on clinical symptom analysis.</p>
               </div>
             </div>
             <div className="flex items-start gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
@@ -126,7 +126,7 @@ export default function LandingPage({ onEnterApp }) {
               </div>
               <div>
                 <h3 className="font-semibold text-sm mb-1">50+ languages</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">Whisper v3 voice input with multilingual support built in.</p>
+                <p className="text-xs text-slate-400 leading-relaxed">Voice input with multilingual translation built in.</p>
               </div>
             </div>
           </div>

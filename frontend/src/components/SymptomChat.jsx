@@ -404,46 +404,10 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-12rem)] animate-fade-in mesh-bg">
+    <div className="h-[calc(100vh-12rem)] animate-fade-in mesh-bg max-w-4xl mx-auto w-full">
       
-      {/* Left Column: Real-time Multi-Agent Telemetry Log */}
+      {/* Chat Interface */}
       <div className="glass-panel flex flex-col h-full overflow-hidden border-dark-700/80">
-        <div className="bg-dark-950 p-4 border-b border-dark-800 flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-neon-green" />
-          <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest">
-            Multi-Agent Telemetry Console
-          </h2>
-        </div>
-        
-        <div className="flex-1 p-4 overflow-y-auto font-mono text-[11px] space-y-3 bg-dark-950/80">
-          {telemetry.length === 0 ? (
-            <div className="text-slate-600 italic h-full flex items-center justify-center text-center p-4">
-              Send a symptom description to view real-time agent execution telemetry logs...
-            </div>
-          ) : (
-            telemetry.map((log, i) => (
-              <div key={i} className="border-b border-dark-800/40 pb-2 animate-fade-in">
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className={`font-bold uppercase ${
-                    log.status === 'success' ? 'text-neon-green' : 
-                    log.status === 'warning' ? 'text-rose-400' : 'text-neon-mint'
-                  }`}>
-                    [{log.agent}]
-                  </span>
-                  <span className="text-slate-600">{log.timestamp}</span>
-                </div>
-                <p className="text-slate-400 mt-1 leading-relaxed">
-                  {log.message}
-                </p>
-              </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* Right Column: Chat Interface */}
-      <div className="lg:col-span-2 glass-panel flex flex-col h-full overflow-hidden border-dark-700/80">
         
         {/* Chat Header */}
         <div className="bg-dark-950 p-4 border-b border-dark-800 flex items-center justify-between">
@@ -454,7 +418,7 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
             <div>
               <h2 className="text-sm font-bold text-white">Symptom Checker Chat</h2>
               <span className="text-[10px] text-neon-green glow-text-green flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" /> Active Agents Grounded
+                <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" /> Clinical Assistant Ready
               </span>
             </div>
           </div>
@@ -560,7 +524,7 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
                 <span className="w-2 h-2 bg-neon-green rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <span className="w-2 h-2 bg-neon-green rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              <span className="text-xs text-slate-500 italic">MediAI Agents thinking...</span>
+              <span className="text-xs text-slate-500 italic">Clinical Assistant is thinking...</span>
             </div>
           )}
           
@@ -579,7 +543,7 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
                   ? 'bg-red-500/20 text-red-400 border-red-500/40 animate-pulse' 
                   : 'bg-dark-900 text-slate-400 border-dark-700 hover:text-neon-green hover:border-neon-green/40'
               }`}
-              title="Voice Input (Whisper)"
+              title="Voice Input"
             >
               {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </button>
@@ -620,8 +584,8 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
                   <Mic className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-sm">Speech-to-Text Dictation Console</h3>
-                  <span className="text-[9px] text-slate-400 block mt-0.5">Whisper Large v3 Sandbox Mode</span>
+                  <h3 className="font-bold text-white text-sm">Voice Input Review</h3>
+                  <span className="text-[9px] text-slate-400 block mt-0.5">Smart Voice Assistant</span>
                 </div>
               </div>
 

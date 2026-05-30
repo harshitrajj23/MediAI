@@ -349,19 +349,19 @@ export default function DocMatch({
 
             </div>
 
-            {/* Right: Medical logs and active data dashboard inside call */}
+            {/* Right: Medical status and active data dashboard inside call */}
             <div className="bg-dark-950 p-5 border border-dark-800 rounded-2xl flex flex-col justify-between">
               <div>
                 <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest border-b border-dark-800 pb-2 mb-4">
-                  Diagnosis Handshake Logs
+                  Clinical Session Status
                 </h3>
                 
                 <div className="space-y-3 text-[10px] font-mono leading-normal">
                   <div className="text-neon-green flex gap-2">
-                    <span>✓</span> <span>BioClinicalBERT concept summary synced.</span>
+                    <span>✓</span> <span>Symptom summary synced.</span>
                   </div>
                   <div className="text-neon-green flex gap-2">
-                    <span>✓</span> <span>Triage risk scoring exported successfully.</span>
+                    <span>✓</span> <span>Triage classification completed.</span>
                   </div>
                   {triageData && (
                     <div className="bg-dark-900 p-2.5 rounded-lg border border-dark-800 mt-3 text-slate-400">
@@ -374,7 +374,7 @@ export default function DocMatch({
 
               <div className="mt-6 pt-4 border-t border-dark-800 text-center">
                 <span className="text-[10px] text-slate-500 block">
-                  MediAI Peer-to-Peer Telemedicine Protocol
+                  Secure Telemedicine Connection
                 </span>
                 <span className="text-[9px] text-slate-600 block mt-1">
                   Session Key: MD-{activeCall.id}

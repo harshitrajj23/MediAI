@@ -281,7 +281,7 @@ export default function MedTracker({
             Medication <span className="text-neon-mint">Adherence Tracker</span>
           </h1>
           <p className="text-slate-400 mt-2 text-xs">
-            Manage your prescription schedule. The system triggers automated SMS notifications to improve patient medication adherence rates in rural areas.
+            Manage your prescription schedule. The system sends secure automated notifications to ensure you never miss a dose.
           </p>
         </div>
 
@@ -293,7 +293,7 @@ export default function MedTracker({
 
           {medications.length === 0 ? (
             <div className="text-center py-12 text-slate-500 text-xs">
-              No medications scheduled. Input your medications on the right to trigger reminder reminders.
+              No medications scheduled. Input your medications on the right to trigger reminders.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -374,36 +374,6 @@ export default function MedTracker({
               })}
             </div>
           )}
-        </div>
-
-        {/* Twilio SMS Reminder dispatch console logs */}
-        <div className="glass-panel p-6 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-dark-800 pb-3 mb-4">
-            <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
-              <Bell className="w-4 h-4 text-neon-mint animate-swing" /> Twilio SMS Reminders Log
-            </h2>
-            <span className="bg-neon-mint/10 text-neon-mint text-[9px] font-bold px-2.5 py-0.5 border border-neon-mint/20 rounded-full uppercase tracking-wider">
-              Adherence Engine Live
-            </span>
-          </div>
-
-          <div className="space-y-3 font-mono text-[10px] max-h-[220px] overflow-y-auto bg-dark-950/80 p-4 rounded-xl border border-dark-800">
-            {smsLogs.map((log) => (
-              <div key={log.id} className="border-b border-dark-800/40 pb-2.5 last:border-b-0">
-                <div className="flex justify-between text-[9px]">
-                  <span className="text-neon-mint font-bold">[Twilio SMS Dispatch]</span>
-                  <span className="text-slate-500">{log.time}</span>
-                </div>
-                <p className="text-slate-400 mt-1 leading-normal">
-                  <span className="text-slate-200 font-semibold">{log.phone}: </span>"{log.message}"
-                </p>
-                <div className="flex items-center gap-1 mt-1.5 text-[8px] font-bold uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-neon-mint animate-pulse" />
-                  <span className="text-neon-mint">{log.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
 
       </div>

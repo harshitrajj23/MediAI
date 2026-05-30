@@ -587,21 +587,7 @@ export default function Dashboard({
             <span className="text-white">Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}</span>
             {userProfile?.name && <span className="text-gradient-green">, {userProfile.name.split(' ')[0]}</span>}
           </h1>
-          <p className="text-slate-500 text-xs mt-1.5 max-w-md">Your clinical health command center. All diagnostic systems active and monitoring.</p>
-        </div>
-        
-        {/* Compact terminal status chip */}
-        <div className="hidden lg:flex items-center gap-3 bg-dark-900/60 backdrop-blur-xl border border-white/[0.04] rounded-xl px-4 py-2.5 max-w-xs">
-          <Terminal className="w-3.5 h-3.5 text-neon-green shrink-0" />
-          <div className="text-[10px] font-mono text-slate-400 truncate">
-            {terminalLogs.length > 0 ? (
-              <span className="animate-fade-in">
-                <span className="text-neon-green mr-1">[{terminalLogs[0].time}]</span>
-                {terminalLogs[0].text}
-              </span>
-            ) : "Syncing health network..."}
-          </div>
-          <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-ping shrink-0" />
+          <p className="text-slate-500 text-xs mt-1.5 max-w-md">Welcome to your personal clinical health companion dashboard.</p>
         </div>
       </motion.div>
 
@@ -1100,7 +1086,7 @@ export default function Dashboard({
               <div className="flex items-center justify-between mb-8 border-b border-white/[0.04] pb-4">
                 <div>
                   <h2 className="outfit-font text-base font-bold text-white">Patient Record System</h2>
-                  <p className="text-[10px] text-slate-500 mt-1">Configure telemetry variables and communication formats.</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Configure your personal profile details and language preferences.</p>
                 </div>
                 {!editingProfile ? (
                   <button onClick={() => setEditingProfile(true)} className="text-xs text-neon-green hover:text-white flex items-center gap-1.5 transition-colors font-bold">
@@ -1128,13 +1114,13 @@ export default function Dashboard({
                     <input type="tel" value={profilePhone} onChange={e => setProfilePhone(e.target.value)} className="input-field w-full text-sm py-3" placeholder="+91 99999-99999" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs text-slate-400 font-bold uppercase tracking-wider">Linguistic Triage Parser</label>
+                    <label className="text-xs text-slate-400 font-bold uppercase tracking-wider">Communication Language</label>
                     <select value={profileLang} onChange={e => setProfileLang(e.target.value)} className="input-field w-full text-sm py-3 cursor-pointer">
                       {['English', 'Hindi', 'Spanish', 'French', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Marathi'].map(l => <option key={l} value={l} className="bg-dark-950 text-white">{l}</option>)}
                     </select>
                   </div>
                   <button type="submit" disabled={updating} className="btn-primary w-full py-3.5 text-xs font-bold uppercase tracking-wider shadow-[0_4px_20px_rgba(34,197,94,0.15)]">
-                    {updating ? 'Saving telemetry records...' : 'Commit profile state'}
+                    {updating ? 'Saving changes...' : 'Save profile changes'}
                   </button>
                 </form>
               ) : (
@@ -1152,35 +1138,11 @@ export default function Dashboard({
                     <span className="text-sm text-slate-300">{profilePhone || '—'}</span>
                   </div>
                   <div className="p-4 bg-dark-950/40 border border-white/[0.02] rounded-2xl">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold block mb-1">Clinical Translation Language</span>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold block mb-1">Translation Language</span>
                     <span className="text-sm text-neon-green font-bold">{profileLang}</span>
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* BIO-CLINICAL LOG CONSOLE DISPLAY */}
-            <div className="bg-dark-900/30 backdrop-blur-xl border border-white/[0.04] rounded-3xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="outfit-font text-xs font-bold text-slate-400 uppercase tracking-widest">BioClinical Agent Terminal Logs</h3>
-                <span className="text-[9px] bg-neon-green/10 text-neon-green border border-neon-green/20 px-1.5 py-0.5 rounded font-mono font-bold uppercase animate-pulse">
-                  Terminal Online
-                </span>
-              </div>
-              <div className="bg-dark-950/80 border border-dark-800 rounded-2xl p-4 font-mono text-[10px] space-y-2 max-h-[160px] overflow-y-auto w-full select-text">
-                {terminalLogs.map(log => (
-                  <div key={log.id} className="flex gap-2 text-slate-300 select-text">
-                    <span className="text-neon-green shrink-0">[{log.time}]</span>
-                    <span className={`shrink-0 ${
-                      log.type === 'success' ? 'text-neon-green' : 
-                      log.type === 'warning' ? 'text-amber-400' : 'text-cyan-400'
-                    }`}>
-                      {log.type === 'success' ? '✓' : log.type === 'warning' ? '⚠' : 'ℹ'}
-                    </span>
-                    <span className="truncate select-text">{log.text}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -1188,11 +1150,11 @@ export default function Dashboard({
           <div className="lg:col-span-2 bg-dark-900/30 backdrop-blur-xl border border-white/[0.04] rounded-3xl p-6 flex flex-col h-[520px]">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.04]">
               <div>
-                <h3 className="outfit-font text-base font-bold text-white">Linguistic Chat Logs</h3>
-                <p className="text-[10px] text-slate-500 mt-1">Archived symptom evaluations stored in cloud.</p>
+                <h3 className="outfit-font text-base font-bold text-white">Symptom Chat History</h3>
+                <p className="text-[10px] text-slate-500 mt-1">Symptom check sessions securely stored in your profile.</p>
               </div>
               <span className="text-[9px] bg-white/[0.04] border border-white/[0.06] text-slate-400 px-2 py-0.5 rounded font-bold font-mono uppercase">
-                {chatsHistory.length} evaluation sessions
+                {chatsHistory.length} sessions
               </span>
             </div>
             

@@ -52,7 +52,7 @@ def analyze_wound_image(image_bytes):
     hf_labels = {}
     if HF_API_TOKEN:
         # CLIP zero-shot classification
-        api_url = f"https://api-inference.huggingface.co/models/{CLIP_MODEL}"
+        api_url = f"https://router.huggingface.co/hf-inference/models/{CLIP_MODEL}"
         headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
         
         # Prepare image bytes for upload

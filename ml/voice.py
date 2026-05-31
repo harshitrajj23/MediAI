@@ -17,7 +17,7 @@ def transcribe_audio_whisper(audio_bytes):
         return {"error": "No audio data received"}
         
     if HF_API_TOKEN:
-        api_url = f"https://api-inference.huggingface.co/models/{WHISPER_MODEL}"
+        api_url = f"https://router.huggingface.co/hf-inference/models/{WHISPER_MODEL}"
         headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
         try:
             res = requests.post(api_url, headers=headers, data=audio_bytes, timeout=10)

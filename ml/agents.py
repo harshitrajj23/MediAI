@@ -66,7 +66,7 @@ def extract_symptoms_bioclinical(symptom_text):
         payload = {"inputs": symptom_text}
         # Using a NER specialized clinical model for actual entity detection if available
         # fallback is emilyalsentzer/BioClinicalBERT
-        api_url = f"https://api-inference.huggingface.co/models/d4data/biomedical-ner-all"
+        api_url = f"https://router.huggingface.co/hf-inference/models/d4data/biomedical-ner-all"
         headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
         try:
             res = requests.post(api_url, headers=headers, json=payload, timeout=5)
@@ -134,7 +134,7 @@ def predict_triage_urgency(symptom_text, extracted_entities):
     hf_scores = None
     if HF_API_TOKEN:
         # Querying an expert medical classification model
-        api_url = f"https://api-inference.huggingface.co/models/microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
+        api_url = f"https://router.huggingface.co/hf-inference/models/microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
         headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
         try:
             # We use embeddings/classification payload

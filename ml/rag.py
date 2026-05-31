@@ -59,7 +59,7 @@ def calculate_bge_embeddings(text):
     If no token or error, returns local heuristic-based mock embedding list.
     """
     if HF_API_TOKEN:
-        api_url = "https://api-inference.huggingface.co/models/BAAI/bge-large-en-v1.5"
+        api_url = "https://router.huggingface.co/hf-inference/models/BAAI/bge-large-en-v1.5"
         headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
         try:
             res = requests.post(api_url, headers=headers, json={"inputs": text}, timeout=5)

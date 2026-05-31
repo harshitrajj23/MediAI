@@ -28,6 +28,8 @@ import DocMatch from './components/DocMatch';
 import LandingPage from './components/LandingPage';
 import NeuralBackground from './components/NeuralBackground';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 export default function App() {
   const [session, setSession] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -109,7 +111,7 @@ export default function App() {
             
             console.log(`[AUTOMATED SCHEDULER] Triggering reminder for ${med.name} at ${alarmTime}`);
             
-            const response = await fetch("http://127.0.0.1:8000/api/medications/remind", {
+            const response = await fetch(`${API_BASE_URL}/api/medications/remind`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ message: msgText })
@@ -226,7 +228,7 @@ export default function App() {
     const coordsObj = await getCoordinates();
     
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/emergency/trigger", {
+      const response = await fetch(`${API_BASE_URL}/api/emergency/trigger`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

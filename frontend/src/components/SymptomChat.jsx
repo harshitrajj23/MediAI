@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 export default function SymptomChat({ 
   session,
   onTriageUpdate, 
@@ -140,11 +142,16 @@ export default function SymptomChat({
 
     try {
       // POST payload
-      const response = await fetch("http://127.0.0.1:8000/api/symptoms/analyze", {
+      const apiUrl = `${API_BASE_URL}/api/symptoms/analyze`;
+      console.log(`[NETWORK LOG] Attempting to hit API URL: ${apiUrl}`);
+      
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ symptom_text: text, language })
       });
+      
+      console.log(`[NETWORK LOG] Received response status: ${response.status}`);
       
       if (!response.ok) {
         throw new Error("Backend query failed");
@@ -176,8 +183,9 @@ export default function SymptomChat({
       saveMessageToSupabase('assistant', data.ai_response, data.triage);
 
     } catch (err) {
-      console.error(err);
-      addTelemetryLog('MediAI Orchestrator', 'Primary API layer timeout. Initializing local sandbox recovery...', 'warning');
+      console.error("[NETWORK LOG] Fetch failed completely:", err);
+      console.log("[NETWORK LOG] Error message:", err.message);
+      addTelemetryLog('MediAI Orchestrator', `API Error: ${err.message}. Initializing sandbox recovery...`, 'warning');
       
       // Robust client-side smart agent fallback
       await new Promise(r => setTimeout(r, 800));
@@ -374,9 +382,12 @@ Disclaimer: MediAI provides preliminary AI-assisted educational guidance. This d
         setIsRecording(false);
         addTelemetryLog('Voice Assistant', `Speech capture error [${e.error}]. Opening fallback editor...`, 'warning');
         
-        // Open fallback editor containing a smart prompt
-        const smartHint = language === 'Hindi' ? "मेरे पैर में दर्द हो रहा है" : "I have pain in my leg";
-        setVoiceText(smartHint);
+        if (e.error === 'not-allowed') {
+          alert("Microphone access was denied. Please grant microphone permissions to use voice input.");
+        }
+        
+        // Open fallback editor with empty prompt
+        setVoiceText("");
         setShowVoiceModal(true);
       };
 

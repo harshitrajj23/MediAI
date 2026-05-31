@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 export default function VisionLab({ 
   session,
   onTriageUpdate, 
@@ -139,7 +141,7 @@ export default function VisionLab({
     formData.append("file", selectedImage);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/vision/analyze", {
+      const response = await fetch(`${API_BASE_URL}/api/vision/analyze`, {
         method: "POST",
         body: formData
       });

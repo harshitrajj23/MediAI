@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 export default function MedTracker({ 
   session,
   medications, 
@@ -44,7 +46,7 @@ export default function MedTracker({
     try {
       const msgText = `🔔 MediAI Reminder Alert:\nTime to take your ${medName} (${dosage})!\nAlarm Time: ${timeVal || "Scheduled Timing"}\nMessage: "${messageVal || 'Please take your prescription.'}"`;
       
-      const response = await fetch("http://127.0.0.1:8000/api/medications/remind", {
+      const response = await fetch(`${API_BASE_URL}/api/medications/remind`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: msgText })
@@ -218,7 +220,7 @@ export default function MedTracker({
         if (enableSms && customMessage.trim()) {
           try {
             const telegramMsg = `🔔 MediAI Bot Active:\nReminder scheduled for ${medName} (${dosage})!\nAlarm Time: ${formattedTime || displayTiming.join(', ') || 'N/A'}\nInstructions: "${customMessage.trim()}"`;
-            await fetch("http://127.0.0.1:8000/api/medications/remind", {
+            await fetch(`${API_BASE_URL}/api/medications/remind`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ message: telegramMsg })

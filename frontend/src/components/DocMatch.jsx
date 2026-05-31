@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 export default function DocMatch({ 
   session,
   triageData, 
@@ -104,7 +106,7 @@ export default function DocMatch({
       return;
     }
     
-    let url = `http://127.0.0.1:8000/api/doctors?triage_urgency=${encodeURIComponent(urgency)}`;
+    let url = `${API_BASE_URL}/api/doctors?triage_urgency=${encodeURIComponent(urgency)}`;
     
     if (symptoms) {
       url += `&symptoms=${encodeURIComponent(symptoms)}`;
